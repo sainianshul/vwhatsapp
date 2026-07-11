@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'apify' => [
+        'token' => env('APIFY_API_TOKEN'),
+    ],
+
+    'llm' => [
+        'default' => env('LLM_PROVIDER', 'gemini'),
+        'gemini' => [
+            'api_key'  => env('GEMINI_API_KEY'),
+            'model'    => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+            'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        ],
+    ],
+
 ];

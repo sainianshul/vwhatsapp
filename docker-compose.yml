@@ -21,6 +21,27 @@ services:
       - mysql
       - redis
 
+  queue:
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: laravel_queue
+
+    restart: unless-stopped
+
+    command: php artisan queue:work --sleep=3 --tries=3
+
+    working_dir: /var/www
+
+    volumes:
+      - ./:/var/www
+
+    depends_on:
+      - mysql
+      - redis
+
   nginx:
 
     image: nginx:latest

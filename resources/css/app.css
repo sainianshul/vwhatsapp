@@ -1,3 +1,175 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* 
+   Modern SaaS Login & Global Custom Styles
+   Enterprise Standard: Do not use inline <style> tags in blade files.
+*/
+body.login-page { 
+    font-family: 'Inter', sans-serif; 
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f8fafc;
+}
+
+.login-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Left Side: Branding / Art */
+.brand-side {
+    flex: 1.2;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-side::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(129,140,248,0.1) 0%, rgba(0,0,0,0) 60%);
+    animation: pulse 15s infinite linear;
+}
+
+@keyframes pulse {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.brand-logo {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-logo i { color: #818cf8; font-size: 2rem; }
+
+.brand-message {
+    z-index: 1;
+    max-width: 480px;
+}
+
+.brand-message h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+}
+
+.brand-message p {
+    font-size: 1.125rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.testimonial {
+    z-index: 1;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+    max-width: 480px;
+}
+
+/* Right Side: Form */
+.form-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    padding: 2rem;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 420px;
+}
+
+.form-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.form-subtitle {
+    color: #64748b;
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #334155;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.form-control:focus {
+    background: #ffffff;
+    border-color: #818cf8;
+    box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.1);
+}
+
+.btn-primary {
+    background: #4f46e5;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    width: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.btn-primary:hover {
+    background: #4338ca;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+}
+
+.form-check-input:checked {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.forgot-link {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.forgot-link:hover { text-decoration: underline; }
+
+@media (max-width: 992px) {
+    .brand-side { display: none; }
+}
