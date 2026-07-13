@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\TargetUserController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginHistoryController;
 
@@ -17,9 +16,22 @@ Route::match(['get', 'post'], 'signout', [AuthController::class, 'signOut'])->na
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
     
-    // Admin Only Routes
-    Route::middleware(['admin'])->group(function () {
-        // User Management
+    // Admin Only Routes (Middleware temporarily disabled as per user request)
+    // Route::middleware(['admin'])->group(function () {
+
+
+        // Bulk Messaging Routes
+        Route::get('/bulk-campaigns/sample-csv', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'downloadSampleCsv'])->name('admin.bulk_campaigns.sample_csv');
+        Route::resource('bulk-campaigns', \App\Http\Controllers\Admin\BulkCampaignController::class, [
+            'names' => 'admin.bulk_campaigns',
+            'only' => ['index', 'create', 'store', 'show']
+        ]);
+
+        // Developer Settings
+        Route::get('/developer-settings', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'index'])->name('admin.developer_settings.index');
+        Route::post('/developer-settings/generate', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'generateToken'])->name('admin.developer_settings.generate');
+        Route::post('/developer-settings/{id}/revoke', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'revokeToken'])->name('admin.developer_settings.revoke');
+
         Route::get('users/trash', [UserController::class, 'trash'])->name('users.trash');
         Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
         Route::resource('users', UserController::class);
@@ -27,49 +39,20 @@ Route::middleware(['auth'])->group(function () {
         // Login History
         Route::get('login-history', [LoginHistoryController::class, 'index'])->name('login_history.index');
         Route::post('login-history/empty', [LoginHistoryController::class, 'empty'])->name('login_history.empty');
+        Route::delete('login-history/{id}', [LoginHistoryController::class, 'destroy'])->name('login_history.destroy');
 
-        // Bot Management
-        Route::get('bots/trash', [\App\Http\Controllers\BotController::class, 'trash'])->name('bots.trash');
-        Route::post('bots/{id}/restore', [\App\Http\Controllers\BotController::class, 'restore'])->name('bots.restore');
-        Route::post('bots/{bot}/cookie', [\App\Http\Controllers\BotController::class, 'updateCookie'])->name('bots.cookie.update');
-        Route::post('bots/{bot}/health-check', [\App\Http\Controllers\BotController::class, 'healthCheck'])->name('bots.health-check');
-        Route::resource('bots', \App\Http\Controllers\BotController::class);
-    });
+        // WhatsApp Accounts
+        Route::get('whatsapp-accounts/trash', [\App\Http\Controllers\Admin\WhatsAppAccountController::class, 'trash'])->name('whatsapp_accounts.trash');
+        Route::delete('whatsapp-accounts/{id}/force-delete', [\App\Http\Controllers\Admin\WhatsAppAccountController::class, 'forceDelete'])->name('whatsapp_accounts.force_delete');
+        Route::post('whatsapp-accounts/start-session', [\App\Http\Controllers\Admin\WhatsAppAccountController::class, 'startSession'])->name('whatsapp_accounts.start_session');
+        Route::get('whatsapp-accounts/qr-status/{session_id}', [\App\Http\Controllers\Admin\WhatsAppAccountController::class, 'qrStatus'])->name('whatsapp_accounts.qr_status');
+        Route::resource('whatsapp-accounts', \App\Http\Controllers\Admin\WhatsAppAccountController::class)->names('whatsapp_accounts');
 
-    // Available to all authenticated users (User + Admin)
-    
-    // Profiles (Subjects)
-    Route::get('subjects/trash', [\App\Http\Controllers\SubjectController::class, 'trash'])->name('subjects.trash');
-    Route::post('subjects/{id}/restore', [\App\Http\Controllers\SubjectController::class, 'restore'])->name('subjects.restore');
-    Route::resource('subjects', \App\Http\Controllers\SubjectController::class);
-
-    // Social Accounts
-    Route::get('subjects/{subject}/accounts/create', [\App\Http\Controllers\SocialAccountController::class, 'create'])->name('subjects.accounts.create');
-    Route::post('social-accounts/search', [\App\Http\Controllers\SocialAccountController::class, 'search'])->name('social-accounts.search');
-    Route::post('social-accounts', [\App\Http\Controllers\SocialAccountController::class, 'store'])->name('social-accounts.store');
-    Route::post('social-accounts/{id}/scrape', [\App\Http\Controllers\SocialAccountController::class, 'scrape'])->name('social-accounts.scrape');
-    Route::post('social-accounts/{id}/sync-scrape', [\App\Http\Controllers\SocialAccountController::class, 'syncScrape'])->name('social-accounts.sync-scrape');
-    Route::get('social-accounts/{id}/status', [\App\Http\Controllers\SocialAccountController::class, 'checkStatus'])->name('social-accounts.status');
-    Route::delete('social-accounts/{id}', [\App\Http\Controllers\SocialAccountController::class, 'destroy'])->name('social-accounts.destroy');
-    
-    // Auto-Engage (Automation Rules)
-    Route::post('social-accounts/{account}/auto-engage', [\App\Http\Controllers\AutomationRuleController::class, 'store'])->name('automation-rules.store');
-    Route::delete('social-accounts/{account}/auto-engage', [\App\Http\Controllers\AutomationRuleController::class, 'destroy'])->name('automation-rules.destroy');
+        // WhatsApp Messages
+        Route::resource('whatsapp-messages', \App\Http\Controllers\Admin\WhatsAppMessageController::class)->only(['index', 'create', 'store', 'destroy'])->names('whatsapp_messages');
+    // });
 
     // Comments & Engagement
-    Route::post('posts/bulk-engage', [\App\Http\Controllers\PostEngagementController::class, 'store'])->name('posts.bulk-engage');
     Route::post('comments', [\App\Http\Controllers\CommentController::class, 'store'])->name('comments.store');
     Route::delete('comments/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
-
-    // Automation & Command Center
-    Route::resource('automation-templates', \App\Http\Controllers\AutomationTemplateController::class)->except(['show']);
-    
-    Route::get('command-center', [\App\Http\Controllers\ScheduledOperationController::class, 'index'])->name('command-center.index');
-    Route::post('command-center/{operation}/cancel', [\App\Http\Controllers\ScheduledOperationController::class, 'cancel'])->name('command-center.cancel');
-    Route::delete('command-center/{operation}', [\App\Http\Controllers\ScheduledOperationController::class, 'destroy'])->name('command-center.destroy');
-
-    // Notifications
-    Route::get('notifications/unread', [\App\Http\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
-    Route::post('notifications/{id}/mark-as-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
-    Route::post('notifications/mark-all-as-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
 });

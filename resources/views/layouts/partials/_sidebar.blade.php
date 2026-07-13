@@ -3,8 +3,8 @@
 
     <!--begin::Logo-->
     <div class="app-sidebar-logo flex-shrink-0 d-none d-md-flex align-items-center px-8" id="kt_app_sidebar_logo">
-        <a href="{{ route('dashboard') }}" class="text-decoration-none">
-            <h1 class="text-gray-900 fs-2 fw-bolder mb-0 ls-1">Social Manager</h1>
+        <a href="{{ route('dashboard') }}" class="d-flex align-items-center mb-0">
+            <h1 class="text-gray-900 fs-2 fw-bolder mb-0 ls-1">VWhatsApp</h1>
         </a>
     </div>
     <!--end::Logo-->
@@ -28,51 +28,7 @@
                     </a>
                 </div>
 
-                {{-- ===================== --}}
-                {{-- INTELLIGENCE --}}
-                {{-- ===================== --}}
-                <div class="menu-item pt-5">
-                    <div class="menu-content">
-                        <span class="menu-heading fw-bold text-uppercase fs-7">Intelligence</span>
-                    </div>
-                </div>
 
-                {{-- Profiles --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('subjects.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-profile-user fs-2"></i>
-                        </span>
-                        <span class="menu-title">Profiles</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->fullUrlIs(route('subjects.index')) ? 'active' : '' }}"
-                                href="{{ route('subjects.index') }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">All Profiles</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('subjects.create') ? 'active' : '' }}"
-                                href="{{ route('subjects.create') }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Add Profile</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('subjects.trash') ? 'active' : '' }}"
-                                href="{{ route('subjects.trash') }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Trash</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                @if(auth()->user()->role !== \App\Models\User::ROLE_USER)
                 {{-- ===================== --}}
                 {{-- PEOPLE --}}
                 {{-- ===================== --}}
@@ -101,20 +57,6 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->fullUrlIs(route('users.index', ['status' => 'active'])) ? 'active' : '' }}"
-                                href="{{ route('users.index', ['status' => 'active']) }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Active</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->fullUrlIs(route('users.index', ['status' => 'blocked'])) ? 'active' : '' }}"
-                                href="{{ route('users.index', ['status' => 'blocked']) }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Blocked</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
                             <a class="menu-link {{ request()->routeIs('users.trash') ? 'active' : '' }}"
                                 href="{{ route('users.trash') }}">
                                 <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
@@ -136,49 +78,35 @@
                 </div>
 
                 {{-- ===================== --}}
-                {{-- AUTOMATION --}}
+                {{-- ACCOUNTS --}}
                 {{-- ===================== --}}
                 <div class="menu-item pt-5">
                     <div class="menu-content">
-                        <span class="menu-heading fw-bold text-uppercase fs-7">Automation</span>
+                        <span class="menu-heading fw-bold text-uppercase fs-7">WhatsApp Accounts</span>
                     </div>
                 </div>
 
-                {{-- Bots --}}
+                {{-- Accounts --}}
                 <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('bots.*') ? 'here show' : '' }}">
+                    class="menu-item menu-accordion {{ request()->routeIs('whatsapp_accounts.*') ? 'here show' : '' }}">
                     <span class="menu-link">
                         <span class="menu-icon">
-                            <i class="ki-outline ki-android fs-2"></i>
+                            <i class="ki-outline ki-whatsapp fs-2"></i>
                         </span>
-                        <span class="menu-title">Bots Manager</span>
+                        <span class="menu-title">Accounts</span>
                         <span class="menu-arrow"></span>
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->fullUrlIs(route('bots.index')) ? 'active' : '' }}"
-                                href="{{ route('bots.index') }}">
+                            <a class="menu-link {{ request()->routeIs('whatsapp_accounts.index') ? 'active' : '' }}"
+                                href="{{ route('whatsapp_accounts.index') }}">
                                 <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">All Bots</span>
+                                <span class="menu-title">All Accounts</span>
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->fullUrlIs(route('bots.index', ['platform' => 'facebook'])) ? 'active' : '' }}"
-                                href="{{ route('bots.index', ['platform' => 'facebook']) }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Facebook</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->fullUrlIs(route('bots.index', ['platform' => 'instagram'])) ? 'active' : '' }}"
-                                href="{{ route('bots.index', ['platform' => 'instagram']) }}">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Instagram</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('bots.trash') ? 'active' : '' }}"
-                                href="{{ route('bots.trash') }}">
+                            <a class="menu-link {{ request()->routeIs('whatsapp_accounts.trash') ? 'active' : '' }}"
+                                href="{{ route('whatsapp_accounts.trash') }}">
                                 <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                 <span class="menu-title">Trash</span>
                             </a>
@@ -186,285 +114,60 @@
                     </div>
                 </div>
 
-                {{-- Comments Templates --}}
-                <div class="menu-item">
-                    <a class="menu-link {{ request()->routeIs('automation-templates.*') ? 'active' : '' }}"
-                        href="{{ route('automation-templates.index') }}">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-magic fs-2"></i>
-                        </span>
-                        <span class="menu-title">Comments Templates</span>
-                    </a>
-                </div>
-
-                {{-- Command Center --}}
-                <div class="menu-item">
-                    <a class="menu-link {{ request()->routeIs('command-center.*') ? 'active' : '' }}"
-                        href="{{ route('command-center.index') }}">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-status fs-2"></i>
-                        </span>
-                        <span class="menu-title">Command Center</span>
-                    </a>
-                </div>
-                @endif
-
                 {{-- ===================== --}}
-                {{-- OPERATIONS --}}
+                {{-- MESSAGES --}}
                 {{-- ===================== --}}
                 <div class="menu-item pt-5">
                     <div class="menu-content">
-                        <span class="menu-heading fw-bold text-uppercase fs-7">Operations</span>
+                        <span class="menu-heading fw-bold text-uppercase fs-7">Messages</span>
                     </div>
                 </div>
 
-
-
-                {{-- Care Requests --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('admin.requests.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-clipboard fs-2"></i>
-                        </span>
-                        <span class="menu-title">Care Requests</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.requests.index') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">All Requests</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.requests.today') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Today Requests</span>
-                            </a>
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- Bookings --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('admin.bookings.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-calendar-tick fs-2"></i>
-                        </span>
-                        <span class="menu-title">Bookings</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.bookings.index') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">All Bookings</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.bookings.active') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Active Bookings</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.bookings.cancelled') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Cancelled Bookings</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Bids --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('admin.bids.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-price-tag fs-2"></i>
-                        </span>
-                        <span class="menu-title">Bids</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.bids.index') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">All Bids</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.bids.today') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Today Bids</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.bids.active') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Active Bids</span>
-                            </a>
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- Services --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('admin.services.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-heart fs-2"></i>
-                        </span>
-                        <span class="menu-title">Services</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.services.care-types.*') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Care Types</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- ===================== --}}
-                {{-- FINANCE --}}
-                {{-- ===================== --}}
-                <div class="menu-item pt-5">
-                    <div class="menu-content">
-                        <span class="menu-heading fw-bold text-uppercase fs-7">Finance</span>
-                    </div>
-                </div>
-
-                {{-- Payments --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('admin.payments.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-dollar fs-2"></i>
-                        </span>
-                        <span class="menu-title">Payments</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.payments.transactions') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Transactions</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.payments.payouts') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Nurse Payouts</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.payments.refunds') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Refunds</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- ===================== --}}
-                {{-- INSIGHTS --}}
-                {{-- ===================== --}}
-                <div class="menu-item pt-5">
-                    <div class="menu-content">
-                        <span class="menu-heading fw-bold text-uppercase fs-7">Insights</span>
-                    </div>
-                </div>
-
-                {{-- Reports --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('admin.reports.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-chart-line fs-2"></i>
-                        </span>
-                        <span class="menu-title">Reports</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.reports.revenue') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Revenue</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.reports.nurse-activity') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Nurse Activity</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.reports.requests') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Request Reports</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- ===================== --}}
-                {{-- SUPPORT --}}
-                {{-- ===================== --}}
-                <div class="menu-item pt-5">
-                    <div class="menu-content">
-                        <span class="menu-heading fw-bold text-uppercase fs-7">Support</span>
-                    </div>
-                </div>
-
-                <!-- Support Tickets -->
+                <!--begin::Menu Item-->
                 <div class="menu-item">
-                    <a class="menu-link {{ request()->routeIs('admin.support.index') || request()->routeIs('admin.support.show') ? 'active' : '' }}" href="#">
+                    <a class="menu-link {{ request()->routeIs('whatsapp_messages.create') ? 'active' : '' }}" href="{{ route('whatsapp_messages.create') }}">
                         <span class="menu-icon">
-                            <i class="ki-outline ki-message-text-2 fs-2"></i>
+                            <i class="ki-outline ki-send fs-2"></i>
                         </span>
-                        <span class="menu-title">Tickets</span>
+                        <span class="menu-title">Send Message</span>
                     </a>
                 </div>
-
-                <!-- FAQ -->
+                <!--end::Menu Item-->
+                <!--begin::Menu Item-->
                 <div class="menu-item">
-                    <a class="menu-link {{ request()->routeIs('admin.support.faqs.*') ? 'active' : '' }}" href="#">
+                    <a class="menu-link {{ request()->routeIs('admin.bulk_campaigns.*') ? 'active' : '' }}" href="{{ route('admin.bulk_campaigns.index') }}">
                         <span class="menu-icon">
-                            <i class="ki-outline ki-message-question fs-2"></i>
+                            <i class="ki-outline ki-rocket fs-2"></i>
                         </span>
-                        <span class="menu-title">FAQ</span>
+                        <span class="menu-title">Bulk Campaigns</span>
                     </a>
                 </div>
+                <!--end::Menu Item-->
 
-                <!-- Support Categories -->
+                <!--begin::Menu Item-->
                 <div class="menu-item">
-                    <a class="menu-link {{ request()->routeIs('admin.support.categories.*') ? 'active' : '' }}" href="#">
+                    <a class="menu-link {{ request()->routeIs('whatsapp_messages.index') ? 'active' : '' }}" href="{{ route('whatsapp_messages.index') }}">
                         <span class="menu-icon">
-                            <i class="ki-outline ki-category fs-2"></i>
+                            <i class="ki-outline ki-document fs-2"></i>
                         </span>
-                        <span class="menu-title">Support Categories</span>
+                        <span class="menu-title">Message Logs</span>
+                    </a>
+                </div>
+                <!--end::Menu Item-->
+
+                <!--begin::Menu Item-->
+                <div class="menu-item pt-5">
+                    <div class="menu-content">
+                        <span class="menu-heading fw-bold text-uppercase fs-7">Developer</span>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <a class="menu-link {{ request()->routeIs('admin.developer_settings.*') ? 'active' : '' }}" href="{{ route('admin.developer_settings.index') }}">
+                        <span class="menu-icon">
+                            <i class="ki-outline ki-code fs-2"></i>
+                        </span>
+                        <span class="menu-title">API Settings</span>
                     </a>
                 </div>
 
@@ -477,94 +180,14 @@
                     </div>
                 </div>
 
-                {{-- System --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('admin.system.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-outline ki-setting-2 fs-2"></i>
-                        </span>
-                        <span class="menu-title">System</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.system.error-logs') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Error Logs</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.system.communication-logs.*') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Communication Logs</span>
-                            </a>
-                        </div>
-                        {{-- <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.system.failed-jobs') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Failed Jobs</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.system.queue') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Queue Monitor</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.system.backups') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Backups</span>
-                            </a>
-                        </div> --}}
-                        <div class="menu-item">
-                            <a class="menu-link" href="{{ url('/api/documentation') }}" target="_blank">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">API</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
                 {{-- Settings --}}
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('admin.settings.*') ? 'here show' : '' }}">
-                    <span class="menu-link">
+                <div class="menu-item">
+                    <a class="menu-link" href="#">
                         <span class="menu-icon">
                             <i class="ki-outline ki-gear fs-2"></i>
                         </span>
                         <span class="menu-title">Settings</span>
-                        <span class="menu-arrow"></span>
-                    </span>
-                    <div class="menu-sub menu-sub-accordion">
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.settings.general') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">General</span>
-                            </a>
-                        </div>
-                        {{-- <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.settings.app') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">App Config</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('admin.settings.roles') ? 'active' : '' }}"
-                                href="#">
-                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                <span class="menu-title">Roles &amp; Permissions</span>
-                            </a>
-                        </div> --}}
-                    </div>
+                    </a>
                 </div>
 
             </div>

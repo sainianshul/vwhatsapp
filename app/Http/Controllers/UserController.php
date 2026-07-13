@@ -87,6 +87,9 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete(); // Soft delete
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
 

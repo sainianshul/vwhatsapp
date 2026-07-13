@@ -332,52 +332,32 @@
 
             // ── Delete ───────────────────────────────────────────────────────
             $(document).on('click', '.btn-delete', function () {
-
-                let id = $(this).data('id');
+                let url = $(this).data('url');
 
                 Swal.fire({
                     title: 'Delete User?',
                     text: 'This action cannot be undone.',
                     icon: 'warning',
-
                     showCancelButton: true,
-
                     confirmButtonText: 'Yes, Delete',
-
                     customClass: {
                         confirmButton: 'btn btn-danger',
                         cancelButton: 'btn btn-light ms-2'
                     },
-
                     buttonsStyling: false,
-
                 }).then(function (result) {
-
-                    if (!result.isConfirmed) {
-                        return;
-                    }
-
-                    $.post('/admin/patients/' + id, {
-                        _method: 'DELETE',
-                        _token: '<?php echo e(csrf_token()); ?>'
-                    })
-
-                    .done(function () {
-
-                        table.ajax.reload(null, false);
-
-                        Swal.fire({
-                            toast: true,
-                            position: 'top',
-                            showConfirmButton: false,
-                            timer: 1500,
-                            icon: 'success',
-                            title: 'User deleted successfully'
+                    if (result.isConfirmed) {
+                        $.post(url, {
+                            _method: 'DELETE',
+                            _token: '<?php echo e(csrf_token()); ?>'
+                        })
+                        .done(function () {
+                            table.ajax.reload(null, false);
+                            Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'User deleted successfully' });
+                        })
+                        .fail(function (xhr) {
+                            toastr.error('Something went wrong.');
                         });
-                    })
-
-                    .fail(function () {
-
                         toastr.error('Something went wrong.');
                     });
                 });

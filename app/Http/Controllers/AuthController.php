@@ -50,7 +50,14 @@ class AuthController extends Controller
     public function dashboard()
     {
         if (Auth::check()) {
-            return view('dashboard');
+            $stats = [
+                'accounts' => \App\Models\WhatsAppAccount::where('user_id', auth()->id())->count(),
+                'connected' => \App\Models\WhatsAppAccount::where('user_id', auth()->id())->where('status', 'connected')->count(),
+                'messages_sent' => \App\Models\WhatsAppMessage::where('user_id', auth()->id())->where('status', 'sent')->count(),
+                'campaigns' => \App\Models\BulkCampaign::where('user_id', auth()->id())->count(),
+                'users' => \App\Models\User::count(),
+            ];
+            return view('dashboard', compact('stats'));
         }
 
         return redirect("login")->with('error', 'Opps! You do not have access');

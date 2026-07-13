@@ -21,3 +21,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+/whatsapp-service/.wwebjs_auth
+/whatsapp-service/node_modules
+/whatsapp-service/.wwebjs_cache

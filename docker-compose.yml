@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    container_name: laravel_app
+    container_name: vwhatsapp_app
 
     restart: unless-stopped
 
@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    container_name: laravel_queue
+    container_name: vwhatsapp_queue
 
     restart: unless-stopped
 
@@ -46,11 +46,11 @@ services:
 
     image: nginx:latest
 
-    container_name: laravel_nginx
+    container_name: vwhatsapp_nginx
 
     restart: unless-stopped
     ports:
-      - "8008:80"
+      - "8010:80"
 
     volumes:
       - ./:/var/www
@@ -63,7 +63,7 @@ services:
 
     image: mysql:8.0
 
-    container_name: laravel_mysql
+    container_name: vwhatsapp_mysql
 
     restart: unless-stopped
 
@@ -74,21 +74,21 @@ services:
       MYSQL_USER: laravel
 
     ports:
-      - "3306:3306"
+      - "3308:3306"
 
     volumes:
-      - mysql_data:/var/lib/mysql
+      - vwhatsapp_mysql_data:/var/lib/mysql
 
   phpmyadmin:
 
     image: phpmyadmin/phpmyadmin
 
-    container_name: laravel_phpmyadmin
+    container_name: vwhatsapp_phpmyadmin
 
     restart: unless-stopped
 
     ports:
-      - "8080:80"
+      - "8082:80"
 
     environment:
       PMA_HOST: mysql
@@ -97,13 +97,13 @@ services:
     depends_on:
       - mysql
 
-  scraper:
+  whatsapp-service:
 
     build:
-      context: ./scraper
+      context: ./whatsapp-service
       dockerfile: Dockerfile
 
-    container_name: social_scraper
+    container_name: vwhatsapp_service
 
     restart: unless-stopped
 
@@ -113,18 +113,23 @@ services:
     environment:
       - NODE_ENV=production
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+      
+    volumes:
+      - ./whatsapp-service/.wwebjs_auth:/app/.wwebjs_auth
+      - ./whatsapp-service:/app
+      - /app/node_modules
 
   redis:
 
     image: redis:latest
 
-    container_name: laravel_redis
+    container_name: vwhatsapp_redis
 
     restart: unless-stopped
 
     ports:
-      - "6379:6379"
+      - "6380:6379"
 
 volumes:
 
-  mysql_data:
+  vwhatsapp_mysql_data:

@@ -328,22 +328,45 @@
                     }
 
                     $.post('{{ route('login_history.empty') }}', {
-
                         _token: '{{ csrf_token() }}'
-
                     })
-
                     .done(function () {
-
                         table.ajax.reload();
-
                         toastr.success('Login history cleared successfully.');
-
                     })
-
                     .fail(function () {
-
                         toastr.error('Something went wrong.');
+                    });
+                });
+            });
+
+            // ── Delete Single Log ──────────────────────────────────
+            $(document).on('click', '.btn-delete', function () {
+                let url = $(this).data('url');
+                Swal.fire({
+                    title: 'Delete Log?',
+                    text: 'This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Delete',
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-light ms-2'
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+
+                    $.post(url, {
+                        _method: 'DELETE',
+                        _token: '{{ csrf_token() }}'
+                    })
+                    .done(function (res) {
+                        table.ajax.reload(null, false);
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'Log deleted successfully' });
+                    })
+                    .fail(function (xhr) {
+                        toastr.error(xhr.responseJSON?.message || 'Something went wrong.');
                     });
                 });
             });

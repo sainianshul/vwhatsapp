@@ -18,4 +18,13 @@ class LoginHistoryController extends Controller
         \App\Models\LoginHistory::truncate();
         return response()->json(['status' => 'success']);
     }
+
+    public function destroy($id)
+    {
+        \App\Models\LoginHistory::findOrFail($id)->delete();
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+        return back()->with('success', 'Log deleted');
+    }
 }

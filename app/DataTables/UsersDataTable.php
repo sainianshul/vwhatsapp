@@ -23,7 +23,7 @@ class UsersDataTable extends DataTable
             })
             ->addColumn('status', function (User $user) {
                 $color = $user->status_color;
-                return '<span class="badge badge-light-'.$color.' fw-bold">'.ucfirst($user->status).'</span>';
+                return '<span class="badge badge-light-'.$color.' border border-'.$color.' fw-bold">'.ucfirst($user->status).'</span>';
             })
             ->addColumn('role_badge', function (User $user) {
                 $role = $user->role ?? \App\Models\User::ROLE_USER;
@@ -33,7 +33,7 @@ class UsersDataTable extends DataTable
                     default => 'primary'
                 };
                 $label = ucfirst($role);
-                return '<span class="badge badge-light-'.$color.' fw-bold">'.$label.'</span>';
+                return '<span class="badge badge-light-'.$color.' border border-'.$color.' fw-bold">'.$label.'</span>';
             })
             ->addColumn('actions', function (User $user) {
                 return '
@@ -44,13 +44,10 @@ class UsersDataTable extends DataTable
                         <a href="'.route('users.edit', $user->id).'" class="btn btn-sm btn-icon btn-light-warning border border-warning w-30px h-30px me-1" title="Edit">
                             <i class="ki-outline ki-pencil fs-5"></i>
                         </a>
-                        <form action="'.route('users.destroy', $user->id).'" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm(\'Are you sure you want to delete this user?\');">
-                            '.csrf_field().'
-                            '.method_field('DELETE').'
-                            <button type="submit" class="btn btn-sm btn-icon btn-light-danger border border-danger w-30px h-30px" title="Delete">
-                                <i class="ki-outline ki-trash fs-5"></i>
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-sm btn-icon btn-light-danger border border-danger w-30px h-30px btn-delete" 
+                            data-url="'.route('users.destroy', $user->id).'" title="Delete">
+                            <i class="ki-outline ki-trash fs-5"></i>
+                        </button>
                     </div>
                 ';
             })
