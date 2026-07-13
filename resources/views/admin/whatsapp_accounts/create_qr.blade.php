@@ -195,6 +195,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     `;
                 }
+                else if (data.status === 'syncing') {
+                    document.getElementById('status-text').innerText = "Syncing Data...";
+                    document.getElementById('status-subtext').innerText = "Please wait while we sync your chats. This may take up to 30 seconds.";
+                    
+                    document.getElementById('qr-container').innerHTML = `
+                        <div class="d-flex flex-column align-items-center justify-content-center animate__animated animate__fadeIn" style="width: 264px; height: 264px;">
+                            <span class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status"></span>
+                        </div>
+                    `;
+                }
                 else if (data.status === 'error') {
                     clearInterval(pollInterval);
                     showError("Connection Failed", "Please try again.");

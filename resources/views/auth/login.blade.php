@@ -89,10 +89,10 @@
                                     <i class="ki-outline ki-sms fs-4 text-gray-500"></i>
                                 </span>
                                 <input
-                                    type="email"
+                                    type="text"
                                     name="email"
                                     id="email"
-                                    value="admin@admin.com"
+                                    value="{{ old('email') }}"
                                     placeholder="Email"
                                     autocomplete="off"
                                     class="form-control form-control-transparent border-0 text-gray-900 @error('email') is-invalid @enderror"
@@ -119,7 +119,6 @@
                                     type="password"
                                     name="password"
                                     id="password"
-                                    value="password"
                                     placeholder="Password"
                                     autocomplete="off"
                                     class="form-control form-control-transparent border-0 text-gray-900 @error('password') is-invalid @enderror"

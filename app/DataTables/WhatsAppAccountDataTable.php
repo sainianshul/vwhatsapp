@@ -16,9 +16,17 @@ class WhatsAppAccountDataTable extends DataTable
                 return '<div class="fw-bold text-gray-800">'.e($name).'</div>';
             })
             ->addColumn('phone_number', function (WhatsAppAccount $account) {
+                $avatar = $account->profile_pic_url ?? asset('assets/media/avatars/blank.png');
+                $pushName = $account->push_name ?? 'WhatsApp User';
                 return '
-                    <div class="d-flex flex-column">
-                        <span class="text-gray-800 fw-bold">'.e($account->phone_number).'</span>
+                    <div class="d-flex align-items-center">
+                        <div class="symbol symbol-45px me-3">
+                            <img src="'.e($avatar).'" alt="DP" class="rounded-circle" />
+                        </div>
+                        <div class="d-flex flex-column">
+                            <span class="text-gray-800 fw-bold">'.e($account->phone_number).'</span>
+                            <span class="text-muted fs-7">'.e($pushName).'</span>
+                        </div>
                     </div>
                 ';
             })

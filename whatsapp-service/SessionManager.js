@@ -5,7 +5,7 @@ class SessionManager {
         this.sessions = new Map();
         this.status = new Map(); // Store statuses: initializing, qr_ready, connected, disconnected
         this.qrCodes = new Map();
-        this.userInfo = new Map(); // Store phone number and pushname
+        this.userInfo = new Map(); // Store phone number, pushname, profilePic
         this.timeouts = new Map(); // Store timeout IDs for cleanup
     }
 
@@ -50,6 +50,7 @@ class SessionManager {
         // Event: Authenticated successfully
         client.on('authenticated', () => {
             console.log(`[SessionManager] Authenticated for session: ${sessionId}`);
+            this.status.set(sessionId, 'authenticating');
             this.qrCodes.delete(sessionId);
             this.clearSessionTimeout(sessionId);
         });
@@ -63,15 +64,22 @@ class SessionManager {
 
             // Extract User Info
             try {
-                setTimeout(() => {
+                setTimeout(async () => {
                     if (client.info) {
                         console.log(`[SessionManager] Raw client.info:`, JSON.stringify(client.info));
                         const wid = client.info.wid || client.info.me;
                         // wid could be an object { user: '...' } or string
                         const phone = (wid && typeof wid === 'object' && wid.user) ? wid.user : (typeof wid === 'string' ? wid.split('@')[0] : null);
                         const name = client.info.pushname || 'WhatsApp User';
-                        this.userInfo.set(sessionId, { phone, name });
-                        console.log(`[SessionManager] User Info extracted: Name=${name}, Phone=${phone}`);
+                        let profilePic = null;
+                        try {
+                            const serializedWid = (wid && typeof wid === 'object' && wid._serialized) ? wid._serialized : `${phone}@c.us`;
+                            profilePic = await client.getProfilePicUrl(serializedWid);
+                        } catch (e) {
+                            console.error(`[SessionManager] Could not fetch profile pic:`, e.message);
+                        }
+                        this.userInfo.set(sessionId, { phone, name, profilePic });
+                        console.log(`[SessionManager] User Info extracted: Name=${name}, Phone=${phone}, DP=${profilePic ? 'Yes' : 'No'}`);
                     } else {
                         console.log(`[SessionManager] client.info is undefined even after 2 seconds`);
                     }

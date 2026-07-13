@@ -102,17 +102,23 @@ class WhatsAppAccountController extends Controller
             if (isset($data['data']['state']) && $data['data']['state'] === 'connected') {
                 $phone = $data['data']['phone'] ?? null;
                 $name = $data['data']['name'] ?? null;
+                $profilePic = $data['data']['profile_pic_url'] ?? null;
 
                 WhatsAppAccount::where('session_id', $sessionId)->update([
                     'status' => 'connected',
                     'phone_number' => $phone,
-                    'push_name' => $name
+                    'push_name' => $name,
+                    'profile_pic_url' => $profilePic
                 ]);
                 return response()->json(['status' => 'connected']);
             }
 
             if (isset($data['data']['qr'])) {
                 return response()->json(['status' => 'pending', 'qr' => $data['data']['qr']]);
+            }
+
+            if (isset($data['status']) && $data['status'] === 'syncing') {
+                return response()->json(['status' => 'syncing']);
             }
 
             return response()->json(['status' => 'waiting']);

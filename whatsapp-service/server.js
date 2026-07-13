@@ -63,12 +63,16 @@ app.get('/api/sessions/:id/qr', async (req, res) => {
                 state: 'connected', 
                 message: 'Already connected',
                 phone: userInfo ? userInfo.phone : null,
-                name: userInfo ? userInfo.name : null
+                name: userInfo ? userInfo.name : null,
+                profile_pic_url: userInfo ? userInfo.profilePic : null
             } 
         });
     }
 
     if (!qrText) {
+        if (status === 'initializing' || status === 'authenticating') {
+            return res.json({ status: 'syncing', data: { state: status } });
+        }
         return res.status(404).json({ status: 'error', message: 'QR Code not available yet or session is disconnected' });
     }
 
