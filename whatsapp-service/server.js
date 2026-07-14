@@ -6,6 +6,14 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+// Prevent Node.js from crashing due to unhandled puppeteer errors (like context destroyed)
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+process.on('uncaughtException', (err) => {
+    console.error('[CRITICAL] Uncaught Exception:', err);
+});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

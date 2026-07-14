@@ -25,6 +25,11 @@ class SessionManager {
                 clientId: sessionId,
                 dataPath: './.wwebjs_auth'
             }),
+            // Use remote cache to prevent WhatsApp Web from forcefully refreshing and destroying execution context
+            webVersionCache: {
+                type: 'remote',
+                remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+            },
             puppeteer: {
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
                 args: [
@@ -37,8 +42,7 @@ class SessionManager {
                     '--disable-gpu',
                     '--disable-extensions',
                     '--mute-audio',
-                    '--disable-software-rasterizer',
-                    '--disable-features=site-per-process' // Crucial for saving RAM on VPS
+                    '--disable-software-rasterizer'
                 ],
                 timeout: 60000
             }
