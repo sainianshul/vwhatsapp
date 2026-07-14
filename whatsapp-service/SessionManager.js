@@ -201,11 +201,21 @@ class SessionManager {
             try {
                 await client.logout();
             } catch (err) {
-                console.error(`[SessionManager] Error during logout:`, err);
+                console.error(`[SessionManager] Error during logout (might not be logged in):`, err.message);
             }
+            
+            // Explicitly destroy the client to kill the Chrome process
+            try {
+                await client.destroy();
+                console.log(`[SessionManager] Browser destroyed for session: ${sessionId}`);
+            } catch (err) {
+                console.error(`[SessionManager] Error destroying browser:`, err.message);
+            }
+
             this.sessions.delete(sessionId);
             this.status.set(sessionId, 'disconnected');
             this.qrCodes.delete(sessionId);
+            this.clearSessionTimeout(sessionId);
         }
     }
 }
