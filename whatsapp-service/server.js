@@ -158,7 +158,7 @@ app.listen(PORT, () => {
                 });
 
                 console.log(`[AutoBoot] Found saved session: ${sessionId}, starting it up...`);
-                SessionManager.startSession(sessionId);
+                SessionManager.startSession(sessionId, true); // isAutoBoot = true
             }
         }
     }
