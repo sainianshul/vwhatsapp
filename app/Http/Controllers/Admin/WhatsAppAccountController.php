@@ -129,9 +129,6 @@ class WhatsAppAccountController extends Controller
                     $account->phone_number = $phone;
                     $account->push_name = $name;
                     $account->profile_pic_url = $profilePic;
-                    if (empty($account->name)) {
-                        $account->name = $name;
-                    }
                     $account->save();
                 }
                 return response()->json(['status' => 'connected']);
