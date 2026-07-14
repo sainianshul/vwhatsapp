@@ -37,7 +37,8 @@ class SessionManager {
                     '--disable-gpu',
                     '--disable-extensions',
                     '--mute-audio',
-                    '--disable-software-rasterizer'
+                    '--disable-software-rasterizer',
+                    '--disable-features=site-per-process' // Crucial for saving RAM on VPS
                 ],
                 timeout: 60000
             }
