@@ -8,6 +8,7 @@ use App\Models\WhatsAppAccount;
 use App\DataTables\WhatsAppAccountDataTable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class WhatsAppAccountController extends Controller
 {
@@ -26,6 +27,7 @@ class WhatsAppAccountController extends Controller
             ->get();
 
         foreach ($abandoned as $oldSession) {
+            Log::info("Auto-deleting abandoned session in create(): {$oldSession->session_id}");
             try {
                 Http::post("{$this->nodeUrl}/api/sessions/{$oldSession->session_id}/logout");
             } catch (\Exception $e) {}
@@ -138,6 +140,7 @@ class WhatsAppAccountController extends Controller
         $account = WhatsAppAccount::findOrFail($id);
         
         try {
+            Log::info("Explicitly deleting session in destroy(): {$account->session_id}");
             Http::post("{$this->nodeUrl}/api/sessions/{$account->session_id}/logout");
         } catch (\Exception $e) {
             // Ignore error if microservice is offline, just delete from DB
