@@ -13,7 +13,7 @@
     <meta property="og:type" content="article" />
     <meta property="og:title" content="Social Manager" />
     <meta property="og:site_name" content="Social Manager" />
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+    <link rel="shortcut icon" href="{{ asset('icon.png') }}" />
 
     <!--begin::Theme mode setup — runs BEFORE any render-->
     <script>

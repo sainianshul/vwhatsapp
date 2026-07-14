@@ -20,11 +20,31 @@
                  url('{{ asset("assets/plugins/global/fonts/keenicons/keenicons-outline.ttf") }}') format("truetype");
         }
         body { background-color: #f4f6f9; }
+        
+        :root, [data-bs-theme="light"], [data-bs-theme="dark"] {
+            --bs-primary: #128C7E !important;
+            --bs-primary-rgb: 18, 140, 126 !important;
+            --bs-primary-active: #075E54 !important;
+            --bs-primary-light: #E7FCE8 !important;
+            --bs-primary-inverse: #ffffff !important;
+            
+            --kt-primary: #128C7E !important;
+            --kt-primary-active: #075E54 !important;
+            --kt-primary-light: #E7FCE8 !important;
+            --kt-primary-inverse: #ffffff !important;
+        }
+
+        .text-primary { color: var(--bs-primary) !important; }
+        .bg-primary { background-color: var(--bs-primary) !important; }
+        .badge-light-primary { background-color: var(--bs-primary-light) !important; color: var(--bs-primary) !important; }
+        .btn-primary { background-color: var(--bs-primary) !important; border-color: var(--bs-primary) !important; color: #fff !important; }
+        .btn-primary:hover { background-color: var(--bs-primary-active) !important; border-color: var(--bs-primary-active) !important; }
+        .btn-active-light-primary:hover { background-color: var(--bs-primary-light) !important; color: var(--bs-primary) !important; }
     </style>
 
     <link href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" />
-    <link rel="shortcut icon" href="{{ asset('assets/media/logos/favicon.ico') }}" />
+    <link rel="shortcut icon" href="{{ asset('icon.png') }}" />
 
     <script>
         var defaultThemeMode = "light";
