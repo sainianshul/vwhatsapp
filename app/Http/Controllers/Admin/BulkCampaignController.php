@@ -130,14 +130,13 @@ class BulkCampaignController extends Controller
 
         $callback = function() use ($query) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['S.No', 'Phone Number', 'Message Content', 'Status', 'Timestamp']);
+            fputcsv($file, ['S.No', 'Phone Number', 'Status', 'Timestamp']);
             
             $i = 1;
             foreach ($query->cursor() as $msg) {
                 fputcsv($file, [
                     $i++,
                     $msg->receiver_number,
-                    $msg->message_text,
                     ucfirst($msg->status),
                     $msg->created_at->format('Y-m-d H:i:s')
                 ]);
