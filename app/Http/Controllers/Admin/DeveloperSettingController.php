@@ -12,6 +12,11 @@ class DeveloperSettingController extends Controller
         return $dataTable->render('admin.developer_settings.index');
     }
 
+    public function docs()
+    {
+        return view('admin.developer_settings.docs');
+    }
+
     public function generateToken(Request $request)
     {
         $request->validate([

@@ -4,149 +4,258 @@
 
 @section('content')
 
-    <!--begin::Toolbar-->
-    <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
-        <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
-            <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
-                <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-                    Hello, {{ auth()->user()->name }} 👋
-                </h1>
-                <span class="text-muted fs-7 fw-semibold mt-1">Here is what's happening with your WhatsApp campaigns today.</span>
-            </div>
-            <div class="d-flex align-items-center gap-2 gap-lg-3">
-                <a href="{{ route('whatsapp_messages.create') }}" class="btn btn-sm fw-bold btn-primary hover-elevate-up">
-                    <i class="ki-outline ki-send fs-3"></i> Quick Send
-                </a>
-                <a href="{{ route('admin.bulk_campaigns.create') }}" class="btn btn-sm fw-bold btn-light-primary hover-elevate-up">
-                    <i class="ki-outline ki-rocket fs-3"></i> New Campaign
-                </a>
-            </div>
+<style>
+    /* Custom Stats Cards based on user's image */
+    .modern-stat-card {
+        border-radius: 8px;
+        padding: 24px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 160px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    .modern-stat-card .title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        opacity: 0.8;
+    }
+    .modern-stat-card .value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+    }
+    .modern-stat-card .icon {
+        position: absolute;
+        right: 20px;
+        top: 30px;
+        font-size: 3.5rem;
+        opacity: 0.4;
+    }
+    .modern-stat-card .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        color: white;
+        opacity: 0.9;
+        margin-top: auto;
+    }
+    .modern-stat-card .footer:hover {
+        opacity: 1;
+    }
+    
+    /* Colors matching the image exactly */
+    .bg-card-purple { background-color: #7b4df2; }
+    .bg-card-green { background-color: #4cd587; }
+    .bg-card-yellow { background-color: #ffc107; }
+    
+    /* Chart card styling */
+    .chart-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .chart-card-header {
+        background: transparent;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1.25rem 1.5rem;
+    }
+</style>
+
+<!--begin::Toolbar-->
+<div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
+    <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
+        <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+            <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+                Dashboard Overview
+            </h1>
+            <span class="text-muted fs-7 fw-semibold mt-1">Monitor your WhatsApp campaigns and delivery metrics</span>
         </div>
     </div>
-    <!--end::Toolbar-->
+</div>
+<!--end::Toolbar-->
 
-    <!--begin::Content-->
-    <div id="kt_app_content" class="app-content flex-column-fluid">
-        <div id="kt_app_content_container" class="app-container container-fluid">
+<!--begin::Content-->
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <div id="kt_app_content_container" class="app-container container-fluid">
+        
+        <!-- Stats Row -->
+        <div class="row g-4 mb-4">
             
-            <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
-                
-                {{-- Accounts --}}
-                <div class="col-md-3">
-                    <div class="card card-flush h-md-100 border border-primary bg-light-primary hover-elevate-up">
-                        <div class="card-header pt-5">
-                            <div class="card-title d-flex flex-column">
-                                <span class="fs-2hx fw-bold text-primary me-2 lh-1 ls-n2">{{ $stats['accounts'] }}</span>
-                                <span class="text-primary opacity-75 pt-1 fw-semibold fs-6">Total Accounts</span>
-                            </div>
-                        </div>
-                        <div class="card-body pt-2 pb-4 d-flex align-items-center">
-                            <i class="ki-outline ki-whatsapp fs-3x text-primary"></i>
-                            <div class="ms-auto">
-                                <span class="badge badge-primary fs-base">
-                                    {{ $stats['connected'] }} Connected
-                                </span>
-                            </div>
-                        </div>
+            <div class="col-md-4">
+                <div class="modern-stat-card bg-card-purple">
+                    <div class="title">Total Accounts</div>
+                    <div class="value" id="stat-accounts">
+                        <span class="spinner-border spinner-border-sm" style="width: 1.5rem; height: 1.5rem;"></span>
                     </div>
-                </div>
-
-                {{-- Messages Sent --}}
-                <div class="col-md-3">
-                    <div class="card card-flush h-md-100 border border-success bg-light-success hover-elevate-up">
-                        <div class="card-header pt-5">
-                            <div class="card-title d-flex flex-column">
-                                <span class="fs-2hx fw-bold text-success me-2 lh-1 ls-n2">{{ number_format($stats['messages_sent']) }}</span>
-                                <span class="text-success opacity-75 pt-1 fw-semibold fs-6">Messages Sent</span>
-                            </div>
-                        </div>
-                        <div class="card-body pt-2 pb-4 d-flex align-items-center">
-                            <i class="ki-outline ki-directbox-default fs-3x text-success"></i>
-                        </div>
+                    <div class="icon">
+                        <i class="ki-outline ki-whatsapp"></i>
                     </div>
+                    <a href="{{ route('whatsapp_accounts.index') }}" class="footer">
+                        <span>View Details</span>
+                        <i class="ki-outline ki-arrow-right fs-4 text-white"></i>
+                    </a>
                 </div>
-
-                {{-- Bulk Campaigns --}}
-                <div class="col-md-3">
-                    <div class="card card-flush h-md-100 border border-info bg-light-info hover-elevate-up">
-                        <div class="card-header pt-5">
-                            <div class="card-title d-flex flex-column">
-                                <span class="fs-2hx fw-bold text-info me-2 lh-1 ls-n2">{{ $stats['campaigns'] }}</span>
-                                <span class="text-info opacity-75 pt-1 fw-semibold fs-6">Bulk Campaigns</span>
-                            </div>
-                        </div>
-                        <div class="card-body pt-2 pb-4 d-flex align-items-center">
-                            <i class="ki-outline ki-rocket fs-3x text-info"></i>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- System Status --}}
-                <div class="col-md-3">
-                    <div class="card card-flush h-md-100 border border-gray-300 hover-elevate-up">
-                        <div class="card-header pt-5">
-                            <div class="card-title d-flex flex-column">
-                                <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">Online</span>
-                                <span class="text-gray-500 pt-1 fw-semibold fs-6">Gateway Status</span>
-                            </div>
-                        </div>
-                        <div class="card-body pt-2 pb-4 d-flex align-items-center">
-                            <i class="ki-outline ki-check-circle fs-3x text-success"></i>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-            
-            <div class="row g-5 g-xl-10">
-                <div class="col-xl-12">
-                    <div class="card card-flush">
-                        <div class="card-header pt-7">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-gray-900">Getting Started</span>
-                                <span class="text-gray-500 mt-1 fw-semibold fs-6">Follow these simple steps to start sending messages</span>
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 mb-5">
-                                    <div class="border border-dashed border-primary rounded px-7 py-5">
-                                        <div class="d-flex flex-center bg-light-primary rounded-circle w-50px h-50px mb-4">
-                                            <span class="fs-2 fw-bold text-primary">1</span>
-                                        </div>
-                                        <h4 class="fw-bold mb-3">Link Device</h4>
-                                        <p class="text-gray-600">Scan the QR code to securely connect your WhatsApp account to the platform.</p>
-                                        <a href="{{ route('whatsapp_accounts.create') }}" class="btn btn-sm btn-light-primary fw-bold">Link Now</a>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-5">
-                                    <div class="border border-dashed border-success rounded px-7 py-5">
-                                        <div class="d-flex flex-center bg-light-success rounded-circle w-50px h-50px mb-4">
-                                            <span class="fs-2 fw-bold text-success">2</span>
-                                        </div>
-                                        <h4 class="fw-bold mb-3">Create Campaign</h4>
-                                        <p class="text-gray-600">Upload your Excel file and compose a personalized message for your audience.</p>
-                                        <a href="{{ route('admin.bulk_campaigns.create') }}" class="btn btn-sm btn-light-success fw-bold">Create Campaign</a>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-5">
-                                    <div class="border border-dashed border-info rounded px-7 py-5">
-                                        <div class="d-flex flex-center bg-light-info rounded-circle w-50px h-50px mb-4">
-                                            <span class="fs-2 fw-bold text-info">3</span>
-                                        </div>
-                                        <h4 class="fw-bold mb-3">Track Progress</h4>
-                                        <p class="text-gray-600">Monitor real-time delivery reports and engage with your successful sends.</p>
-                                        <a href="{{ route('admin.bulk_campaigns.index') }}" class="btn btn-sm btn-light-info fw-bold">View Reports</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
+            <div class="col-md-4">
+                <div class="modern-stat-card bg-card-green">
+                    <div class="title">Messages Sent</div>
+                    <div class="value" id="stat-messages">
+                        <span class="spinner-border spinner-border-sm" style="width: 1.5rem; height: 1.5rem;"></span>
                     </div>
+                    <div class="icon">
+                        <i class="ki-outline ki-directbox-default"></i>
+                    </div>
+                    <a href="{{ route('whatsapp_messages.index') }}" class="footer">
+                        <span>View Details</span>
+                        <i class="ki-outline ki-arrow-right fs-4 text-white"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="modern-stat-card bg-card-yellow">
+                    <div class="title">Bulk Campaigns</div>
+                    <div class="value" id="stat-campaigns">
+                        <span class="spinner-border spinner-border-sm" style="width: 1.5rem; height: 1.5rem;"></span>
+                    </div>
+                    <div class="icon">
+                        <i class="ki-outline ki-rocket"></i>
+                    </div>
+                    <a href="{{ route('admin.bulk_campaigns.index') }}" class="footer">
+                        <span>View Details</span>
+                        <i class="ki-outline ki-arrow-right fs-4 text-white"></i>
+                    </a>
                 </div>
             </div>
 
         </div>
+        
+        <!-- Chart Row -->
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-card">
+                    <div class="chart-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 font-weight-bold text-dark">Delivery Performance (Last 7 Days)</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="position: relative; height:350px; width:100%;">
+                            <canvas id="messagesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <!--end::Content-->
+</div>
+<!--end::Content-->
 
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Fetch stats via AJAX
+    fetch("{{ route('dashboard.stats') }}")
+        .then(response => response.json())
+        .then(data => {
+            // Update stats
+            document.getElementById('stat-accounts').innerHTML = data.stats.accounts + '<span style="font-size: 1rem; margin-left: 10px; font-weight: normal; opacity: 0.8;">(' + data.stats.connected + ' Active)</span>';
+            document.getElementById('stat-messages').innerText = new Intl.NumberFormat().format(data.stats.messages_sent);
+            document.getElementById('stat-campaigns').innerText = data.stats.campaigns;
+
+            // Render Chart
+            const ctx = document.getElementById('messagesChart').getContext('2d');
+            
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(13, 110, 253, 0.15)');
+            gradient.addColorStop(1, 'rgba(13, 110, 253, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.graph.labels,
+                    datasets: [{
+                        label: 'Messages Delivered',
+                        data: data.graph.data,
+                        backgroundColor: gradient,
+                        borderColor: '#0d6efd',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#0d6efd',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#fff',
+                            bodyColor: '#cbd5e1',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.04)',
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                padding: 10
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                padding: 10
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching dashboard stats:', error));
+});
+</script>
+@endpush

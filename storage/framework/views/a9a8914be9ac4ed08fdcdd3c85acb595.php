@@ -9,6 +9,9 @@
                 </ul>
             </div>
             <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <a href="<?php echo e(route('admin.developer_settings.docs')); ?>" class="btn btn-sm btn-light-primary fw-bold">
+                    <i class="ki-outline ki-document fs-2"></i> API Docs
+                </a>
                 <button type="button" class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#kt_modal_new_key">
                     <i class="ki-outline ki-plus fs-2"></i> Generate Key
                 </button>
@@ -43,7 +46,7 @@
 
             <div class="row g-5 g-xl-10">
                 <!-- API Keys Management -->
-                <div class="col-xl-7">
+                <div class="col-xl-12">
                     <div class="card shadow-sm h-xl-100 border">
                         <div class="card-header pt-7 border-bottom">
                             <h3 class="card-title align-items-start flex-column">
@@ -90,48 +93,6 @@
                                 'actionText' => 'Generate Key',
                                 'attributes' => 'data-bs-toggle="modal" data-bs-target="#kt_modal_new_key"'
                             ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- API Documentation -->
-                <div class="col-xl-5">
-                    <div class="card shadow-sm h-xl-100 border">
-                        <div class="card-header pt-7 border-bottom">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-dark fs-4">Documentation</span>
-                                <span class="text-muted mt-1 fw-semibold fs-7">Quick integration guide</span>
-                            </h3>
-                        </div>
-                        <div class="card-body pt-6">
-                            
-                            <div class="mb-8">
-                                <h5 class="fw-bold text-dark mb-3">Endpoint</h5>
-                                <div class="d-flex align-items-center bg-light-primary border border-primary border-dashed p-3 rounded">
-                                    <span class="badge badge-primary me-3 fs-7">POST</span>
-                                    <span class="text-primary fw-bold fs-6"><?php echo e(url('/api/v1/messages/send')); ?></span>
-                                </div>
-                            </div>
-
-                            <div class="mb-8">
-                                <h5 class="fw-bold text-dark mb-3">Authentication Header</h5>
-                                <div class="bg-light p-4 rounded border border-gray-300">
-                                    <code class="text-dark fs-6 d-block mb-1">Content-Type: <span class="text-primary">application/json</span></code>
-                                    <code class="text-dark fs-6 d-block">Authorization: Bearer <span class="text-danger">YOUR_API_KEY</span></code>
-                                </div>
-                            </div>
-
-                            <div class="mb-0">
-                                <h5 class="fw-bold text-dark mb-3">JSON Request Body</h5>
-                                <div class="bg-light p-4 rounded border border-gray-300">
-                                    <pre class="mb-0"><code class="text-dark fs-6">{
-  <span class="text-primary">"to"</span>: <span class="text-success">"919876543210"</span>,
-  <span class="text-primary">"text"</span>: <span class="text-success">"Hello from CRM!"</span>,
-  <span class="text-muted">"from"</span>: <span class="text-success">"918888888888"</span> <span class="text-muted">// Optional</span>
-}</code></pre>
-                                </div>
-                            </div>
 
                         </div>
                     </div>

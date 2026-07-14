@@ -4,6 +4,31 @@
     data-kt-app-sidebar-enabled="true" data-kt-app-sidebar-fixed="true" data-kt-app-sidebar-push-header="true"
     data-kt-app-sidebar-push-toolbar="true" data-kt-app-sidebar-push-footer="true" class="app-default">
     <style>
+        /* Change global primary theme color to WhatsApp Green */
+        :root, [data-bs-theme="light"], [data-bs-theme="dark"] {
+            --bs-primary: #128C7E !important;
+            --bs-primary-rgb: 18, 140, 126 !important;
+            --bs-primary-active: #075E54 !important;
+            --bs-primary-light: #E7FCE8 !important;
+            --bs-primary-inverse: #ffffff !important;
+            
+            --kt-primary: #128C7E !important;
+            --kt-primary-active: #075E54 !important;
+            --kt-primary-light: #E7FCE8 !important;
+            --kt-primary-inverse: #ffffff !important;
+        }
+
+        /* Ensure DataTables pagination uses the primary green color */
+        .pagination .page-item.active .page-link {
+            background-color: var(--bs-primary) !important;
+            border-color: var(--bs-primary) !important;
+            color: #ffffff !important;
+        }
+        
+        .pagination .page-item .page-link:hover {
+            color: var(--bs-primary) !important;
+            background-color: var(--bs-primary-light) !important;
+        }
         /* Force a clean, neutral light-gray background instead of Metronic's default purplish tint ONLY in light mode */
         html[data-bs-theme="light"] body, 
         html[data-bs-theme="light"] #kt_app_body,

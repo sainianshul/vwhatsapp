@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>Sign In — Schotech</title>
-
+    <title>Sign In — VWhatsApp</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&display=swap" />
@@ -19,6 +19,7 @@
             src: url('{{ asset("assets/plugins/global/fonts/keenicons/keenicons-outline.woff") }}') format("woff"),
                  url('{{ asset("assets/plugins/global/fonts/keenicons/keenicons-outline.ttf") }}') format("truetype");
         }
+        body { background-color: #f4f6f9; }
     </style>
 
     <link href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" />
@@ -40,19 +41,19 @@
 
             <div class="d-flex flex-column flex-column-fluid flex-center w-lg-50 p-10">
 
-                <div class="d-flex justify-content-between flex-column-auto mb-10 w-100" style="max-width: 420px;">
-                    <a href="#" class="d-flex align-items-center">
-                        <span class="text-gray-900 fw-bolder fs-2">
-                            Scho<span class="text-primary">tech</span>
-                        </span>
+                <div class="d-flex justify-content-between flex-column-auto mb-8 w-100" style="max-width: 420px;">
+                    <a href="#" class="d-flex align-items-center text-decoration-none">
+                        <img src="{{ asset('icon.png') }}" alt="Logo" class="h-35px me-3" />
+                        <span class="text-gray-900 fw-bolder fs-2">VWhatsApp</span>
                     </a>
                     <span class="badge badge-light-primary fw-semibold fs-8 px-4 py-2">Admin Portal</span>
                 </div>
 
-                <div class="bg-body d-flex flex-column align-items-stretch flex-center rounded w-100 p-10 border border-gray-200 border-top border-top-3 border-primary shadow-sm" style="max-width: 420px;">
+                <div class="bg-body d-flex flex-column align-items-stretch flex-center rounded-3 w-100 p-10 border border-gray-200 shadow-sm" style="max-width: 420px;">
 
                     <div class="d-flex flex-center flex-column flex-column-fluid pb-5">
-                        <h1 class="text-gray-900 fw-bolder mb-2 fs-2x">Login</h1>
+                        <h1 class="text-gray-900 fw-bolder mb-1 fs-2x">Welcome Back</h1>
+                        <div class="text-muted fw-semibold fs-6">Please sign in to your account</div>
                     </div>
 
                     @if (session('error'))

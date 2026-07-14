@@ -336,8 +336,7 @@
                         .fail(function (xhr) {
                             toastr.error('Something went wrong.');
                         });
-                        toastr.error('Something went wrong.');
-                    });
+                    }
                 });
             });
 

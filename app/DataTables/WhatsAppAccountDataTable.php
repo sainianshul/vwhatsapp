@@ -11,24 +11,16 @@ class WhatsAppAccountDataTable extends DataTable
     {
         return datatables()
             ->eloquent($query)
+            ->addColumn('avatar', function (WhatsAppAccount $account) {
+                $avatar = $account->profile_pic_url ?? asset('assets/media/avatars/blank.png');
+                return '<div class="symbol symbol-45px"><img src="'.e($avatar).'" alt="DP" class="rounded-circle" /></div>';
+            })
             ->addColumn('name', function (WhatsAppAccount $account) {
-                $name = $account->name ?? '-';
+                $name = $account->name ?: $account->push_name ?: '-';
                 return '<div class="fw-bold text-gray-800">'.e($name).'</div>';
             })
             ->addColumn('phone_number', function (WhatsAppAccount $account) {
-                $avatar = $account->profile_pic_url ?? asset('assets/media/avatars/blank.png');
-                $pushName = $account->push_name ?? 'WhatsApp User';
-                return '
-                    <div class="d-flex align-items-center">
-                        <div class="symbol symbol-45px me-3">
-                            <img src="'.e($avatar).'" alt="DP" class="rounded-circle" />
-                        </div>
-                        <div class="d-flex flex-column">
-                            <span class="text-gray-800 fw-bold">'.e($account->phone_number).'</span>
-                            <span class="text-muted fs-7">'.e($pushName).'</span>
-                        </div>
-                    </div>
-                ';
+                return '<span class="text-gray-800 fw-bold">'.e($account->phone_number).'</span>';
             })
             ->editColumn('status', function (WhatsAppAccount $account) {
                 if ($account->status === 'connected') {
@@ -55,7 +47,7 @@ class WhatsAppAccountDataTable extends DataTable
                     </div>
                 ';
             })
-            ->rawColumns(['name', 'phone_number', 'status', 'created_at', 'actions']);
+            ->rawColumns(['avatar', 'name', 'phone_number', 'status', 'created_at', 'actions']);
     }
 
     public function query(WhatsAppAccount $model)

@@ -21,16 +21,15 @@ class BulkCampaignDataTable extends DataTable
             ->editColumn('status', function (BulkCampaign $campaign) {
                 if ($campaign->status === 'completed') {
                     return '<span class="badge badge-light-success border border-success fw-bold">Completed</span>';
-                } elseif ($campaign->status === 'processing') {
-                    return '<span class="badge badge-light-primary border border-primary fw-bold">Processing</span>';
+                } elseif ($campaign->status === 'running' || $campaign->status === 'processing') {
+                    return '<span class="badge badge-light-primary border border-primary fw-bold">Running</span>';
+                } elseif ($campaign->status === 'failed') {
+                    return '<span class="badge badge-light-danger border border-danger fw-bold">Failed</span>';
                 }
-                return '<span class="badge badge-light-warning border border-warning fw-bold">'.ucfirst($campaign->status).'</span>';
+                return '<span class="badge badge-light-warning border border-warning fw-bold">'.ucfirst($campaign->status ?: 'Pending').'</span>';
             })
             ->editColumn('created_at', function (BulkCampaign $campaign) {
                 return '<div class="fw-semibold">'.$campaign->created_at->format('d M Y, H:i').'</div>';
-            })
-            ->addColumn('stats', function (BulkCampaign $campaign) {
-                return '<span class="text-muted fw-bold">'.$campaign->total_sent.' / '.$campaign->total_messages.' Sent</span>';
             })
             ->addColumn('actions', function (BulkCampaign $campaign) {
                 return '
@@ -41,7 +40,7 @@ class BulkCampaignDataTable extends DataTable
                     </div>
                 ';
             })
-            ->rawColumns(['campaign_name', 'status', 'created_at', 'stats', 'actions']);
+            ->rawColumns(['campaign_name', 'status', 'created_at', 'actions']);
     }
 
     public function query(BulkCampaign $model)

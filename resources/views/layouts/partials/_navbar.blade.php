@@ -6,8 +6,9 @@
             <div class="btn btn-icon btn-active-color-primary w-35px h-35px me-2" id="kt_app_sidebar_mobile_toggle">
                 <i class="ki-outline ki-abstract-14 fs-2"></i>
             </div>
-            <a href="{{ route('dashboard') }}">
-                <span class="text-gray-900 fw-bolder fs-4">Vcan<span class="text-primary">cares</span></span>
+            <a href="{{ route('dashboard') }}" class="d-flex align-items-center text-decoration-none">
+                <img src="{{ asset('icon.png') }}" alt="Logo" class="h-25px me-2" />
+                <span class="text-gray-900 fw-bolder fs-4">VWhatsApp</span>
             </a>
         </div>
         <!--end::Sidebar toggle-->

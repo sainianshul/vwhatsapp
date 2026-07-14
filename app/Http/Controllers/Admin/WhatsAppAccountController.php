@@ -104,12 +104,17 @@ class WhatsAppAccountController extends Controller
                 $name = $data['data']['name'] ?? null;
                 $profilePic = $data['data']['profile_pic_url'] ?? null;
 
-                WhatsAppAccount::where('session_id', $sessionId)->update([
-                    'status' => 'connected',
-                    'phone_number' => $phone,
-                    'push_name' => $name,
-                    'profile_pic_url' => $profilePic
-                ]);
+                $account = WhatsAppAccount::where('session_id', $sessionId)->first();
+                if ($account) {
+                    $account->status = 'connected';
+                    $account->phone_number = $phone;
+                    $account->push_name = $name;
+                    $account->profile_pic_url = $profilePic;
+                    if (empty($account->name)) {
+                        $account->name = $name;
+                    }
+                    $account->save();
+                }
                 return response()->json(['status' => 'connected']);
             }
 

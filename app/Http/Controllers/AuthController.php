@@ -50,17 +50,48 @@ class AuthController extends Controller
     public function dashboard()
     {
         if (Auth::check()) {
-            $stats = [
-                'accounts' => \App\Models\WhatsAppAccount::where('user_id', auth()->id())->count(),
-                'connected' => \App\Models\WhatsAppAccount::where('user_id', auth()->id())->where('status', 'connected')->count(),
-                'messages_sent' => \App\Models\WhatsAppMessage::where('user_id', auth()->id())->where('status', 'sent')->count(),
-                'campaigns' => \App\Models\BulkCampaign::where('user_id', auth()->id())->count(),
-                'users' => \App\Models\User::count(),
-            ];
-            return view('dashboard', compact('stats'));
+            return view('dashboard');
         }
 
         return redirect("login")->with('error', 'Opps! You do not have access');
+    }
+
+    public function dashboardStats()
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $userId = auth()->id();
+
+        // Calculate basic stats
+        $stats = [
+            'accounts' => \App\Models\WhatsAppAccount::where('user_id', $userId)->count(),
+            'connected' => \App\Models\WhatsAppAccount::where('user_id', $userId)->where('status', 'connected')->count(),
+            'messages_sent' => \App\Models\WhatsAppMessage::where('user_id', $userId)->where('status', 'sent')->count(),
+            'campaigns' => \App\Models\BulkCampaign::where('user_id', $userId)->count(),
+        ];
+
+        // Calculate graph data (Messages sent over the last 7 days)
+        $graphLabels = [];
+        $graphData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $graphLabels[] = now()->subDays($i)->format('M d');
+            $count = \App\Models\WhatsAppMessage::where('user_id', $userId)
+                ->where('status', 'sent')
+                ->whereDate('created_at', $date)
+                ->count();
+            $graphData[] = $count;
+        }
+
+        return response()->json([
+            'stats' => $stats,
+            'graph' => [
+                'labels' => $graphLabels,
+                'data' => $graphData
+            ]
+        ]);
     }
 
     public function signOut(Request $request)

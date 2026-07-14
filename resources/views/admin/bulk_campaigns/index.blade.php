@@ -59,7 +59,6 @@
                             <th class="w-50px">S.No</th>
                             <th class="min-w-200px">Campaign Name</th>
                             <th class="min-w-100px">Status</th>
-                            <th class="min-w-150px">Progress</th>
                             <th class="min-w-150px">Created At</th>
                             <th class="text-end min-w-100px pe-3">Actions</th>
                         </tr>
@@ -103,7 +102,6 @@
                     { data: null, name: 'id', render: function (data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; }, orderable: false, searchable: false },
                     { data: 'campaign_name', name: 'campaign_name' },
                     { data: 'status', name: 'status' },
-                    { data: 'stats', name: 'stats', orderable: false, searchable: false },
                     { data: 'created_at', name: 'created_at' },
                     {
                         data: 'actions',

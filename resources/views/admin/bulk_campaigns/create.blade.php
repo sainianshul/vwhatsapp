@@ -108,8 +108,20 @@
 
                                 <!-- Live Preview -->
                                 <h4 class="fs-5 fw-bold text-gray-800 mb-4">Live Preview</h4>
-                                <div class="bg-light p-4 rounded mb-5" style="min-height: 100px;">
-                                    <div id="previewBox" class="text-gray-700 text-wrap text-break" style="white-space: pre-wrap;">Select a CSV and type a message to see the preview here...</div>
+                                <div class="p-5 mb-5 rounded" style="background-color: #efeae2; min-height: 200px; border-radius: 8px;">
+                                    <div class="d-flex justify-content-end">
+                                        <div class="p-3 shadow-sm position-relative" style="background-color: #d9fdd3; color: #111b21; border-radius: 8px 0px 8px 8px; max-width: 85%;">
+                                            <!-- Message Tail (Fake CSS triangle) -->
+                                            <div style="position: absolute; top: 0; right: -8px; width: 0; height: 0; border-top: 0px solid transparent; border-bottom: 12px solid transparent; border-left: 10px solid #d9fdd3;"></div>
+                                            
+                                            <div id="previewBox" class="text-wrap text-break fs-6" style="white-space: pre-wrap; margin-bottom: 15px;">Select a CSV and type a message to see the preview here...</div>
+                                            
+                                            <div class="text-end position-absolute bottom-0 end-0 p-2" style="font-size: 11px; color: #667781;">
+                                                <span class="me-1">12:00</span>
+                                                <i class="ki-solid ki-check-double text-info fs-7"></i>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                             </div>

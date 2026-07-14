@@ -48,7 +48,7 @@ class LoginHistoryDataTable extends DataTable
                 return '
                     <div class="d-flex gap-1 justify-content-end">
                         <button type="button" class="btn btn-sm btn-icon btn-light-danger border border-danger w-30px h-30px btn-delete" 
-                            data-url="'.route('admin.login_history.destroy', $history->id).'" title="Delete">
+                            data-url="'.route('login_history.destroy', $history->id).'" title="Delete">
                             <i class="ki-outline ki-trash fs-5"></i>
                         </button>
                     </div>

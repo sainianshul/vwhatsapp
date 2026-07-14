@@ -11,6 +11,9 @@
                 </ul>
             </div>
             <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <a href="{{ route('admin.developer_settings.docs') }}" class="btn btn-sm btn-light-primary fw-bold">
+                    <i class="ki-outline ki-document fs-2"></i> API Docs
+                </a>
                 <button type="button" class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#kt_modal_new_key">
                     <i class="ki-outline ki-plus fs-2"></i> Generate Key
                 </button>
@@ -45,29 +48,16 @@
 
             <div class="row g-5 g-xl-10">
                 <!-- API Keys Management -->
-                <div class="col-xl-7">
+                <div class="col-xl-12">
                     <div class="card shadow-sm h-xl-100 border">
-                        <div class="card-header pt-7 border-bottom">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-dark fs-4">Active API Keys</span>
-                                <span class="text-muted mt-1 fw-semibold fs-7">Tokens currently accessing your WhatsApp service</span>
-                            </h3>
+                        <div class="card-header border-bottom align-items-center justify-content-end pt-5 pb-3">
+                            <button type="button" class="btn btn-sm btn-icon btn-light btn-active-light-primary border border-gray-300 w-35px h-35px flex-shrink-0" id="refresh-table-btn" data-bs-toggle="tooltip" title="Refresh table">
+                                <i class="ki-outline ki-arrows-circle fs-3"></i>
+                            </button>
                         </div>
                         <div class="card-body pt-5">
                             
-                            {{-- Search and Refresh --}}
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center position-relative w-100 me-2">
-                                    <i class="ki-duotone ki-magnifier fs-5 text-gray-900 position-absolute ms-4 z-index-3">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                    </i>
-                                    <input type="text" id="dt-search" class="form-control form-control-sm form-control-transparent border border-gray-800 text-gray-900 ps-11 pe-4 fs-7 fw-semibold shadow-sm w-100" placeholder="Search tokens..." />
-                                </div>
-                                <button type="button" class="btn btn-sm btn-icon btn-light btn-active-light-primary border border-gray-300 w-35px h-35px flex-shrink-0" id="refresh-table-btn" data-bs-toggle="tooltip" title="Refresh">
-                                    <i class="ki-outline ki-arrows-circle fs-3"></i>
-                                </button>
-                            </div>
+
 
                             <div id="tokens-table-wrapper" class="table-responsive">
                                 <table id="tokens-table" class="table table-row-bordered align-middle fs-6 gy-4 w-100">
@@ -92,48 +82,6 @@
                                 'actionText' => 'Generate Key',
                                 'attributes' => 'data-bs-toggle="modal" data-bs-target="#kt_modal_new_key"'
                             ])
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- API Documentation -->
-                <div class="col-xl-5">
-                    <div class="card shadow-sm h-xl-100 border">
-                        <div class="card-header pt-7 border-bottom">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-dark fs-4">Documentation</span>
-                                <span class="text-muted mt-1 fw-semibold fs-7">Quick integration guide</span>
-                            </h3>
-                        </div>
-                        <div class="card-body pt-6">
-                            
-                            <div class="mb-8">
-                                <h5 class="fw-bold text-dark mb-3">Endpoint</h5>
-                                <div class="d-flex align-items-center bg-light-primary border border-primary border-dashed p-3 rounded">
-                                    <span class="badge badge-primary me-3 fs-7">POST</span>
-                                    <span class="text-primary fw-bold fs-6">{{ url('/api/v1/messages/send') }}</span>
-                                </div>
-                            </div>
-
-                            <div class="mb-8">
-                                <h5 class="fw-bold text-dark mb-3">Authentication Header</h5>
-                                <div class="bg-light p-4 rounded border border-gray-300">
-                                    <code class="text-dark fs-6 d-block mb-1">Content-Type: <span class="text-primary">application/json</span></code>
-                                    <code class="text-dark fs-6 d-block">Authorization: Bearer <span class="text-danger">YOUR_API_KEY</span></code>
-                                </div>
-                            </div>
-
-                            <div class="mb-0">
-                                <h5 class="fw-bold text-dark mb-3">JSON Request Body</h5>
-                                <div class="bg-light p-4 rounded border border-gray-300">
-                                    <pre class="mb-0"><code class="text-dark fs-6">{
-  <span class="text-primary">"to"</span>: <span class="text-success">"919876543210"</span>,
-  <span class="text-primary">"text"</span>: <span class="text-success">"Hello from CRM!"</span>,
-  <span class="text-muted">"from"</span>: <span class="text-success">"918888888888"</span> <span class="text-muted">// Optional</span>
-}</code></pre>
-                                </div>
-                            </div>
 
                         </div>
                     </div>
@@ -237,15 +185,6 @@
                     }
                     $('[data-bs-toggle="tooltip"]').tooltip({ trigger: 'hover' });
                 }
-            });
-
-            let searchTimer;
-            $('#dt-search').on('input', function () {
-                clearTimeout(searchTimer);
-                let query = $(this).val();
-                searchTimer = setTimeout(function () {
-                    table.search(query).draw();
-                }, 400);
             });
 
             $('#refresh-table-btn').on('click', function () {
