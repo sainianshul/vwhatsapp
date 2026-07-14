@@ -158,12 +158,16 @@
 document.addEventListener('DOMContentLoaded', function () {
     let sessionId = "{{ $sessionId }}";
     let pollInterval;
+    let failCount = 0;          // Track consecutive failures
+    const MAX_FAILS = 5;        // Only show error after 5 consecutive failures
 
     function checkStatus() {
         fetch(`{{ route('whatsapp_accounts.qr_status', '') }}/${sessionId}`)
             .then(res => res.json())
             .then(data => {
+                // ── Connected ──
                 if (data.status === 'connected') {
+                    failCount = 0;
                     clearInterval(pollInterval);
                     
                     document.getElementById('status-container').classList.add('d-none');
@@ -171,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('redirect-message').classList.add('d-flex');
                     
                     let qrBox = document.getElementById('qr-container');
-                    qrBox.style.background = '#f1faff'; // light primary background
+                    qrBox.style.background = '#f1faff';
                     qrBox.style.borderColor = '#009ef7';
                     
                     qrBox.innerHTML = `
@@ -185,7 +189,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         window.location.href = "{{ route('whatsapp_accounts.index') }}";
                     }, 2000);
                 } 
+                // ── QR Code Ready ──
                 else if (data.status === 'pending' && data.qr) {
+                    failCount = 0;
                     document.getElementById('status-text').innerText = "Ready to Scan";
                     document.getElementById('status-subtext').innerText = "Point your phone's camera at this code";
                     
@@ -195,7 +201,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     `;
                 }
+                // ── Syncing (authenticated, waiting for ready) ──
                 else if (data.status === 'syncing') {
+                    failCount = 0;
                     document.getElementById('status-text').innerText = "Syncing Data...";
                     document.getElementById('status-subtext').innerText = "Please wait while we sync your chats. This may take up to 30 seconds.";
                     
@@ -205,12 +213,23 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     `;
                 }
-                else if (data.status === 'error') {
-                    clearInterval(pollInterval);
-                    showError("Connection Failed", "Please try again.");
+                // ── Waiting (transient, keep polling) ──
+                else if (data.status === 'waiting') {
+                    // Do nothing — just wait for the next poll
+                }
+                // ── Failed (session truly dead from Node) ──
+                else if (data.status === 'failed') {
+                    failCount++;
+                    if (failCount >= MAX_FAILS) {
+                        clearInterval(pollInterval);
+                        showError("Connection Failed", "Please try again.");
+                    }
                 }
             })
-            .catch(err => console.error("Polling error:", err));
+            .catch(err => {
+                // Network glitch — DON'T show error, just wait for next poll
+                console.warn("Polling network error (will retry):", err.message);
+            });
     }
 
     function showError(title, msg) {
@@ -240,7 +259,6 @@ document.addEventListener('DOMContentLoaded', function () {
     .then(res => res.json())
     .then(data => {
         if(data.success) {
-            // Start polling every 3 seconds after successful initialization
             pollInterval = setInterval(checkStatus, 3000);
         } else {
             showError("Microservice Offline", data.message || "Failed to initialize.");

@@ -109,8 +109,13 @@ class WhatsAppAccountController extends Controller
     public function qrStatus($sessionId)
     {
         try {
-            $response = Http::get("{$this->nodeUrl}/api/sessions/{$sessionId}/qr");
+            $response = Http::timeout(5)->get("{$this->nodeUrl}/api/sessions/{$sessionId}/qr");
             $data = $response->json();
+
+            // If Node returned a non-200 or malformed response, just tell frontend to wait
+            if (!$response->successful() || !is_array($data)) {
+                return response()->json(['status' => 'waiting']);
+            }
 
             // Check if status changed to connected
             if (isset($data['data']['state']) && $data['data']['state'] === 'connected') {
@@ -140,10 +145,18 @@ class WhatsAppAccountController extends Controller
                 return response()->json(['status' => 'syncing']);
             }
 
+            // Node returned 'failed' (session truly dead) 
+            if (isset($data['status']) && $data['status'] === 'failed') {
+                return response()->json(['status' => 'failed']);
+            }
+
             return response()->json(['status' => 'waiting']);
 
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+            // Network error / timeout — DON'T tell frontend it's an error.
+            // Just say "waiting" so it retries on the next poll.
+            Log::warning("qrStatus transient error for {$sessionId}: " . $e->getMessage());
+            return response()->json(['status' => 'waiting']);
         }
     }
 

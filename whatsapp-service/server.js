@@ -56,7 +56,9 @@ app.get('/api/sessions/:id/status', (req, res) => {
 });
 
 /**
- * Get the QR code for a session
+ * Get the QR code / connection status for a session.
+ * IMPORTANT: This endpoint NEVER returns an error status during normal flow.
+ * The frontend relies on this to decide when to show "Connected" or "Error".
  */
 app.get('/api/sessions/:id/qr', async (req, res) => {
     const sessionId = req.params.id;
@@ -64,12 +66,12 @@ app.get('/api/sessions/:id/qr', async (req, res) => {
     const qrText = SessionManager.getQrCode(sessionId);
     const userInfo = SessionManager.getUserInfo(sessionId);
 
+    // 1. Connected — return user info
     if (status === 'connected') {
         return res.json({ 
             status: 'success', 
             data: { 
                 state: 'connected', 
-                message: 'Already connected',
                 phone: userInfo ? userInfo.phone : null,
                 name: userInfo ? userInfo.name : null,
                 profile_pic_url: userInfo ? userInfo.profilePic : null
@@ -77,20 +79,23 @@ app.get('/api/sessions/:id/qr', async (req, res) => {
         });
     }
 
-    if (!qrText) {
-        if (status === 'initializing' || status === 'authenticating') {
-            return res.json({ status: 'syncing', data: { state: status } });
+    // 2. QR code available — return it
+    if (qrText) {
+        try {
+            const qrImage = await qrcode.toDataURL(qrText);
+            return res.json({ status: 'success', data: { state: status, qr: qrImage } });
+        } catch (error) {
+            return res.json({ status: 'syncing', data: { state: 'qr_error' } });
         }
-        return res.status(404).json({ status: 'error', message: 'QR Code not available yet or session is disconnected' });
     }
 
-    try {
-        // Return as base64 image
-        const qrImage = await qrcode.toDataURL(qrText);
-        res.json({ status: 'success', data: { state: status, qr: qrImage, raw: qrText } });
-    } catch (error) {
-        res.status(500).json({ status: 'error', message: 'Failed to generate QR code image' });
+    // 3. Transitional states — tell frontend to wait
+    if (['initializing', 'authenticating', 'qr_ready'].includes(status)) {
+        return res.json({ status: 'syncing', data: { state: status } });
     }
+
+    // 4. Error or disconnected or not_found — ONLY now return error
+    return res.json({ status: 'failed', data: { state: status } });
 });
 
 /**
