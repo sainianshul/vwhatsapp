@@ -107,6 +107,7 @@ class SessionManager {
             this.status.set(sessionId, 'disconnected');
             this.qrCodes.delete(sessionId);
             this.clearSessionTimeout(sessionId);
+            try { client.destroy(); } catch (e) {}
         });
 
         // Event: Client disconnected
@@ -117,6 +118,7 @@ class SessionManager {
             this.qrCodes.delete(sessionId);
             this.userInfo.delete(sessionId);
             this.clearSessionTimeout(sessionId);
+            try { client.destroy(); } catch (e) {}
         });
 
         this.sessions.set(sessionId, client);
@@ -216,6 +218,19 @@ class SessionManager {
             this.status.set(sessionId, 'disconnected');
             this.qrCodes.delete(sessionId);
             this.clearSessionTimeout(sessionId);
+            
+            // Delete the auth folder from disk to prevent disk space leak
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                const authPath = path.join(__dirname, '.wwebjs_auth', `session-${sessionId}`);
+                if (fs.existsSync(authPath)) {
+                    fs.rmSync(authPath, { recursive: true, force: true });
+                    console.log(`[SessionManager] Deleted auth folder for session: ${sessionId}`);
+                }
+            } catch (err) {
+                console.error(`[SessionManager] Failed to delete auth folder:`, err.message);
+            }
         }
     }
 }
