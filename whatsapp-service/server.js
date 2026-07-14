@@ -90,7 +90,7 @@ app.get('/api/sessions/:id/qr', async (req, res) => {
     }
 
     // 3. Transitional states — tell frontend to wait
-    if (['initializing', 'authenticating', 'qr_ready'].includes(status)) {
+    if (['initializing', 'authenticating', 'qr_ready', 'syncing_data'].includes(status)) {
         return res.json({ status: 'syncing', data: { state: status } });
     }
 

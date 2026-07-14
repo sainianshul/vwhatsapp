@@ -73,11 +73,12 @@ class SessionManager {
         // ─── Client is fully ready ───
         client.on('ready', () => {
             console.log(`[SessionManager] Client is ready for session: ${sessionId}`);
-            this.status.set(sessionId, 'connected');
+            // Don't set 'connected' yet — wait until user info is extracted
+            this.status.set(sessionId, 'syncing_data');
             this.qrCodes.delete(sessionId);
             this.clearSessionTimeout(sessionId);
 
-            // Extract user info safely
+            // Extract user info, then set status to 'connected'
             this._extractUserInfo(client, sessionId);
         });
 
@@ -118,12 +119,20 @@ class SessionManager {
      * Safely extract user info after the client is ready.
      */
     _extractUserInfo(client, sessionId) {
-        setTimeout(async () => {
+        // Try immediately, then retry after delays if client.info isn't ready yet
+        const tryExtract = async (attempt) => {
             try {
                 if (!client.info) {
-                    console.log(`[SessionManager] client.info is undefined for ${sessionId}`);
+                    if (attempt < 5) {
+                        console.log(`[SessionManager] client.info not ready for ${sessionId}, retry ${attempt + 1}/5`);
+                        setTimeout(() => tryExtract(attempt + 1), 2000);
+                        return;
+                    }
+                    console.log(`[SessionManager] client.info still undefined after 5 retries for ${sessionId}, marking connected anyway`);
+                    this.status.set(sessionId, 'connected');
                     return;
                 }
+
                 console.log(`[SessionManager] Raw client.info:`, JSON.stringify(client.info));
                 const wid = client.info.wid || client.info.me;
                 const phone = (wid && typeof wid === 'object' && wid.user)
@@ -143,10 +152,19 @@ class SessionManager {
 
                 this.userInfo.set(sessionId, { phone, name, profilePic });
                 console.log(`[SessionManager] User Info: Name=${name}, Phone=${phone}, DP=${profilePic ? 'Yes' : 'No'}`);
+
+                // NOW mark as connected — user info is guaranteed to be available
+                this.status.set(sessionId, 'connected');
+                console.log(`[SessionManager] Session ${sessionId} is now fully connected with user info.`);
             } catch (err) {
                 console.error(`[SessionManager] Error extracting user info:`, err.message);
+                // Still mark as connected so user isn't stuck forever
+                this.status.set(sessionId, 'connected');
             }
-        }, 3000); // Wait 3 seconds for client.info to populate
+        };
+
+        // Start first attempt after 1 second
+        setTimeout(() => tryExtract(0), 1000);
     }
 
     /**
@@ -196,10 +214,10 @@ class SessionManager {
         const client = this.sessions.get(sessionId);
         const currentStatus = this.status.get(sessionId);
 
-        if (currentStatus === 'initializing') {
+        if (currentStatus === 'initializing' || currentStatus === 'authenticating') {
             throw new Error('Session is currently booting up. Please try again in 5-10 seconds.');
         }
-        if (!client || currentStatus !== 'connected') {
+        if (!client || (currentStatus !== 'connected' && currentStatus !== 'syncing_data')) {
             throw new Error('Session is not connected');
         }
 
