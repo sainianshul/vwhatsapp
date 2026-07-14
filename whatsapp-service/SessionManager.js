@@ -27,7 +27,19 @@ class SessionManager {
             }),
             puppeteer: {
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
-                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-accelerated-2d-canvas', '--no-first-run', '--no-zygote', '--single-process', '--disable-gpu']
+                args: [
+                    '--no-sandbox', 
+                    '--disable-setuid-sandbox', 
+                    '--disable-dev-shm-usage', 
+                    '--disable-accelerated-2d-canvas', 
+                    '--no-first-run', 
+                    '--no-zygote', 
+                    '--disable-gpu',
+                    '--disable-extensions',
+                    '--mute-audio',
+                    '--disable-software-rasterizer'
+                ],
+                timeout: 60000
             }
         });
 
