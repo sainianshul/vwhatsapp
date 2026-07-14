@@ -27,6 +27,18 @@ class WhatsAppAccountController extends Controller
             ->get();
 
         foreach ($abandoned as $oldSession) {
+            // Check real status from Node before deleting to prevent race condition
+            try {
+                $response = Http::timeout(2)->get("{$this->nodeUrl}/api/sessions/{$oldSession->session_id}/status");
+                $data = $response->json();
+                if (isset($data['data']['state']) && $data['data']['state'] === 'connected') {
+                    // It actually connected! Just update DB and don't delete.
+                    $oldSession->status = 'connected';
+                    $oldSession->save();
+                    continue;
+                }
+            } catch (\Exception $e) {}
+
             Log::info("Auto-deleting abandoned session in create(): {$oldSession->session_id}");
             try {
                 Http::post("{$this->nodeUrl}/api/sessions/{$oldSession->session_id}/logout");
