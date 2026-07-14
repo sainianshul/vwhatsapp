@@ -128,18 +128,34 @@ class BulkCampaignController extends Controller
             'Pragma'              => 'public'
         ];
 
-        $callback = function() use ($query) {
+        // Fetch first record to get dynamic headers
+        $firstRecord = $query->first();
+        $csvHeaders = ['phone']; // Default fallback
+        if ($firstRecord && is_array($firstRecord->variables) && count($firstRecord->variables) > 0) {
+            $csvHeaders = array_keys($firstRecord->variables);
+        }
+
+        $callback = function() use ($query, $csvHeaders) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['S.No', 'Phone Number', 'Status', 'Timestamp']);
             
-            $i = 1;
+            // Output exactly the original CSV headers
+            fputcsv($file, $csvHeaders);
+            
             foreach ($query->cursor() as $msg) {
-                fputcsv($file, [
-                    $i++,
-                    $msg->receiver_number,
-                    ucfirst($msg->status),
-                    $msg->created_at->format('Y-m-d H:i:s')
-                ]);
+                $row = [];
+                $variables = is_array($msg->variables) ? $msg->variables : [];
+                
+                foreach ($csvHeaders as $header) {
+                    if (array_key_exists($header, $variables)) {
+                        $row[] = $variables[$header];
+                    } else if (strtolower($header) === 'phone') {
+                        $row[] = $msg->receiver_number;
+                    } else {
+                        $row[] = '';
+                    }
+                }
+                
+                fputcsv($file, $row);
             }
             fclose($file);
         };
