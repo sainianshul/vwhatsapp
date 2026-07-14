@@ -103,4 +103,48 @@ class BulkCampaignController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    public function exportCsv(Request $request, BulkCampaign $bulkCampaign)
+    {
+        if ($bulkCampaign->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $status = $request->query('status', 'all');
+        
+        $query = \App\Models\WhatsAppMessage::where('bulk_campaign_id', $bulkCampaign->id);
+        
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $fileName = 'campaign_' . $bulkCampaign->id . '_' . $status . '_report.csv';
+
+        $headers = [
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Content-type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+            'Expires'             => '0',
+            'Pragma'              => 'public'
+        ];
+
+        $callback = function() use ($query) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['S.No', 'Phone Number', 'Message Content', 'Status', 'Timestamp']);
+            
+            $i = 1;
+            foreach ($query->cursor() as $msg) {
+                fputcsv($file, [
+                    $i++,
+                    $msg->receiver_number,
+                    $msg->message_text,
+                    ucfirst($msg->status),
+                    $msg->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

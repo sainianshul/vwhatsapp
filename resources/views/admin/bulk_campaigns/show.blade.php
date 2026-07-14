@@ -110,6 +110,18 @@
                         </div>
                     </div>
 
+                    {{-- Export Dropdown --}}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light-primary border border-primary dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="ki-outline ki-file-down fs-3"></i> Export CSV
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="{{ route('admin.bulk_campaigns.export', ['bulkCampaign' => $bulkCampaign->id, 'status' => 'all']) }}"><i class="ki-outline ki-document text-primary me-2"></i> All Messages</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.bulk_campaigns.export', ['bulkCampaign' => $bulkCampaign->id, 'status' => 'sent']) }}"><i class="ki-outline ki-check-circle text-success me-2"></i> Sent Only</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.bulk_campaigns.export', ['bulkCampaign' => $bulkCampaign->id, 'status' => 'failed']) }}"><i class="ki-outline ki-cross-circle text-danger me-2"></i> Failed Only</a></li>
+                        </ul>
+                    </div>
+
                     {{-- Refresh Button --}}
                     <button type="button" class="btn btn-icon btn-light btn-active-light-primary border border-gray-300 w-35px h-35px" id="refresh-table-btn" data-bs-toggle="tooltip" title="Refresh">
                         <i class="ki-outline ki-arrows-circle fs-3"></i>
