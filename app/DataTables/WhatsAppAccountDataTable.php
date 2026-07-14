@@ -12,8 +12,12 @@ class WhatsAppAccountDataTable extends DataTable
         return datatables()
             ->eloquent($query)
             ->addColumn('avatar', function (WhatsAppAccount $account) {
-                $avatar = $account->profile_pic_url ?? asset('assets/media/avatars/blank.png');
-                return '<div class="symbol symbol-45px"><img src="'.e($avatar).'" alt="DP" class="rounded-circle" /></div>';
+                if ($account->status !== 'connected' || empty($account->profile_pic_url) || $account->profile_pic_url === 'null' || $account->profile_pic_url === 'undefined') {
+                    $name = $account->name ?: $account->push_name ?: 'W';
+                    $initial = strtoupper(substr(trim($name), 0, 1));
+                    return '<div class="symbol symbol-45px symbol-light-primary"><span class="symbol-label fs-5 fw-bold text-primary">'.e($initial).'</span></div>';
+                }
+                return '<div class="symbol symbol-45px"><img src="'.e($account->profile_pic_url).'" alt="DP" class="rounded-circle" /></div>';
             })
             ->addColumn('name', function (WhatsAppAccount $account) {
                 $name = $account->name ?: $account->push_name ?: '-';
