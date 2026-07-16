@@ -18,6 +18,15 @@
             --kt-primary-inverse: #ffffff !important;
         }
 
+        /* Force primary text color to override hardcoded SCSS utility classes */
+        .text-primary { color: var(--bs-primary) !important; }
+        .text-hover-primary:hover { color: var(--bs-primary) !important; }
+        a.text-primary:hover, a.text-primary:focus { color: var(--bs-primary-active) !important; }
+        
+        .bg-primary { background-color: var(--bs-primary) !important; }
+        .btn-primary { background-color: var(--bs-primary) !important; border-color: var(--bs-primary) !important; }
+        .btn-primary:hover { background-color: var(--bs-primary-active) !important; border-color: var(--bs-primary-active) !important; }
+
         /* Ensure DataTables pagination uses the primary green color */
         .pagination .page-item.active .page-link {
             background-color: var(--bs-primary) !important;

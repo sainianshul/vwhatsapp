@@ -37,11 +37,31 @@ class ProcessQuickMessage implements ShouldQueue
         }
 
         try {
-            $response = $whatsappService->sendMessage(
-                $messageRecord->whatsappAccount->session_id,
-                $messageRecord->receiver_number,
-                $messageRecord->message_text
-            );
+            if ($messageRecord->media_path) {
+                $mediaAbsolutePath = \Illuminate\Support\Facades\Storage::path($messageRecord->media_path);
+                if (file_exists($mediaAbsolutePath)) {
+                    $response = $whatsappService->sendMediaMessage(
+                        $messageRecord->whatsappAccount->session_id,
+                        $messageRecord->receiver_number,
+                        $mediaAbsolutePath,
+                        $messageRecord->message_text,
+                        basename($mediaAbsolutePath)
+                    );
+                } else {
+                    Log::warning("ProcessQuickMessage Error: Media file not found at {$mediaAbsolutePath}, sending text only.");
+                    $response = $whatsappService->sendMessage(
+                        $messageRecord->whatsappAccount->session_id,
+                        $messageRecord->receiver_number,
+                        $messageRecord->message_text
+                    );
+                }
+            } else {
+                $response = $whatsappService->sendMessage(
+                    $messageRecord->whatsappAccount->session_id,
+                    $messageRecord->receiver_number,
+                    $messageRecord->message_text
+                );
+            }
 
             if ($response['success']) {
                 $messageRecord->update(['status' => 'sent', 'error_message' => null]);

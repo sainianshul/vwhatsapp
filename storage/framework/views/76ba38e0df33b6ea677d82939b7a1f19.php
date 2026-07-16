@@ -77,6 +77,7 @@
                     <thead>
                         <tr class="text-start text-gray-900 fw-medium fs-7 text-uppercase gs-0 border-bottom border-gray-200 border-1">
                             <th class="w-50px">S.No</th>
+                            <th class="w-60px">Profile</th>
                             <th class="min-w-150px">Name</th>
                             <th class="min-w-150px">Phone Number</th>
                             <th class="min-w-100px">Status</th>
@@ -121,6 +122,7 @@
                 },
                 columns: [
                     { data: null, name: 'id', render: function (data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; }, orderable: false, searchable: false },
+                    { data: 'avatar', name: 'avatar', orderable: false, searchable: false },
                     { data: 'name', name: 'name' },
                     { data: 'phone_number', name: 'phone_number' },
                     { data: 'status', name: 'status' },

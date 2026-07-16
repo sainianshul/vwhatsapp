@@ -233,6 +233,57 @@ class SessionManager {
     }
 
     /**
+     * Send a media message through a connected session.
+     * Uses MessageMedia.fromFilePath() to read the file directly from disk.
+     *
+     * @param {string} sessionId
+     * @param {string} to - Phone number
+     * @param {string} mediaPath - Absolute path to the media file on disk
+     * @param {string} caption - Optional text caption
+     * @param {string} filename - Optional filename override (useful for documents)
+     */
+    async sendMediaMessage(sessionId, to, mediaPath, caption, filename) {
+        const client = this.sessions.get(sessionId);
+        const currentStatus = this.status.get(sessionId);
+
+        if (currentStatus === 'initializing' || currentStatus === 'authenticating') {
+            throw new Error('Session is currently booting up. Please try again in 5-10 seconds.');
+        }
+        if (!client || (currentStatus !== 'connected' && currentStatus !== 'syncing_data')) {
+            throw new Error('Session is not connected');
+        }
+
+        // Verify file exists before attempting to send
+        const fs = require('fs');
+        if (!fs.existsSync(mediaPath)) {
+            throw new Error(`Media file not found at path: ${mediaPath}`);
+        }
+
+        let cleanTo = to.replace(/[^0-9]/g, '');
+        const formattedTo = `${cleanTo}@c.us`;
+
+        const numberDetails = await client.getNumberId(formattedTo);
+        if (!numberDetails) {
+            throw new Error(`The number ${cleanTo} is not registered on WhatsApp.`);
+        }
+
+        const { MessageMedia } = require('whatsapp-web.js');
+        const media = MessageMedia.fromFilePath(mediaPath);
+
+        // Override filename if provided (useful for documents)
+        if (filename) {
+            media.filename = filename;
+        }
+
+        const options = {};
+        if (caption) {
+            options.caption = caption;
+        }
+
+        return await client.sendMessage(numberDetails._serialized, media, options);
+    }
+
+    /**
      * Logout and fully destroy a session (called when user deletes an account).
      * Also removes auth folder from disk.
      */

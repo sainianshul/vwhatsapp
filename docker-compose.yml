@@ -117,6 +117,7 @@ services:
     volumes:
       - ./whatsapp-service/.wwebjs_auth:/app/.wwebjs_auth
       - ./whatsapp-service:/app
+      - ./storage:/var/www/storage
       - /app/node_modules
 
   redis:

@@ -29,6 +29,7 @@ class BulkCampaignController extends Controller
             'whatsapp_account_id' => 'required|exists:whats_app_accounts,id',
             'message_template' => 'required|string',
             'csv_file' => 'required|file|mimes:csv,txt|max:10240', // 10MB
+            'media_file' => 'nullable|file|max:16384|mimes:jpg,jpeg,png,gif,mp4,mp3,ogg,pdf,doc,docx,xls,xlsx,zip', // 16MB
             'delay_min' => 'required|integer|min:1',
             'delay_max' => 'required|integer|gt:delay_min',
         ]);
@@ -43,11 +44,32 @@ class BulkCampaignController extends Controller
         // Count total contacts (basic count)
         $file = fopen(Storage::path($path), 'r');
         $headers = fgetcsv($file); // Skip header
+
+        // Validate CSV Headers
+        if (!$headers) {
+            fclose($file);
+            Storage::disk('local')->delete($path);
+            return back()->withInput()->withErrors(['csv_file' => 'The uploaded CSV file is empty or invalid.']);
+        }
+
+        $lowercaseHeaders = array_map('strtolower', array_map('trim', $headers));
+        if (!in_array('phone', $lowercaseHeaders)) {
+            fclose($file);
+            Storage::disk('local')->delete($path);
+            return back()->withInput()->withErrors(['csv_file' => 'The CSV file must contain a "phone" column.']);
+        }
+
         $totalContacts = 0;
         while (fgetcsv($file) !== false) {
             $totalContacts++;
         }
         fclose($file);
+
+        // Store media file (optional)
+        $mediaPath = null;
+        if ($request->hasFile('media_file')) {
+            $mediaPath = $request->file('media_file')->store('campaigns/media', 'local');
+        }
 
         // Create campaign
         $campaign = BulkCampaign::create([
@@ -56,6 +78,7 @@ class BulkCampaignController extends Controller
             'campaign_name' => $request->campaign_name,
             'message_template' => $request->message_template,
             'csv_file_path' => $path,
+            'media_path' => $mediaPath,
             'total_contacts' => $totalContacts,
             'status' => 'pending',
             'delay_min' => $request->delay_min,

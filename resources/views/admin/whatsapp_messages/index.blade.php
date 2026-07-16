@@ -134,6 +134,28 @@
         </div>
     </div>
 
+    <!-- Error Log Modal -->
+    <div class="modal fade" tabindex="-1" id="error-modal">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-sm border border-danger">
+                <div class="modal-header border-bottom border-gray-200 bg-light-danger">
+                    <h3 class="modal-title text-danger fw-bold"><i class="ki-outline ki-information-5 text-danger fs-2 me-2"></i>Error Details</h3>
+                    <div class="btn btn-icon btn-sm btn-active-light-danger ms-2" data-bs-dismiss="modal">
+                        <i class="ki-outline ki-cross fs-1"></i>
+                    </div>
+                </div>
+                <div class="modal-body p-6">
+                    <div class="border border-danger border-dashed rounded p-4 bg-light-danger">
+                        <div id="modal-error-text" class="text-danger fs-6 fw-semibold font-monospace" style="white-space: pre-wrap; word-break: break-word;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-gray-200 p-4">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('datatables_css')
@@ -239,6 +261,27 @@
             $(document).on('click', '.view-message-btn', function() {
                 $('#modal-message-text').text($(this).data('message'));
                 $('#message-modal').modal('show');
+            });
+
+            $(document).on('click', '.view-error-btn', function() {
+                let errorData = $(this).data('error');
+                $('#modal-error-text').text(errorData);
+                $('#error-modal').modal('show');
+            });
+
+            $(document).on('click', '.resend-message-btn', function () {
+                let url = $(this).data('url');
+                
+                $.post(url, {
+                    _token: '{{ csrf_token() }}'
+                })
+                .done(function (res) {
+                    table.ajax.reload(null, false);
+                    Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: res.message || 'Message queued for resending' });
+                })
+                .fail(function (xhr) {
+                    toastr.error(xhr.responseJSON?.message || 'Something went wrong.');
+                });
             });
 
             $(document).on('click', '.btn-delete', function () {

@@ -114,7 +114,26 @@ app.post('/api/messages/send', async (req, res) => {
 
     try {
         const response = await SessionManager.sendMessage(session_id, receiver, text);
-        res.json({ status: 'success', data: { messageId: response.id.id } });
+        res.json({ status: 'success', data: { messageId: response?.id?.id || 'unknown' } });
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+/**
+ * Send a media message (image, video, document, audio)
+ * Uses file path from shared disk volume — no base64 overhead.
+ */
+app.post('/api/messages/send-media', async (req, res) => {
+    const { session_id, receiver, media_path, caption, filename } = req.body;
+
+    if (!session_id || !receiver || !media_path) {
+        return res.status(400).json({ status: 'error', message: 'session_id, receiver, and media_path are required' });
+    }
+
+    try {
+        const response = await SessionManager.sendMediaMessage(session_id, receiver, media_path, caption || '', filename || '');
+        res.json({ status: 'success', data: { messageId: response?.id?.id || 'unknown' } });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });
     }

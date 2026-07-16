@@ -74,6 +74,14 @@
                                 </div>
 
                                 <div class="mb-7">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <label class="form-label fw-semibold mb-0">Attach Media (Optional)</label>
+                                    </div>
+                                    <input type="file" name="media_file" id="mediaFile" class="form-control" accept="image/*,video/mp4,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" />
+                                    <div class="text-muted fs-7 mt-2">Attach an image, video, audio, or document (Max 16MB). This media will be sent to all contacts.</div>
+                                </div>
+
+                                <div class="mb-7">
                                     <label class="required form-label fw-semibold">Message Template</label>
                                     <textarea name="message_template" id="messageTemplate" class="form-control" rows="6" placeholder="Hi @{{name}}, here is your special offer!" required>{{ old('message_template') }}</textarea>
                                 </div>

@@ -48,27 +48,14 @@
                 <!-- API Keys Management -->
                 <div class="col-xl-12">
                     <div class="card shadow-sm h-xl-100 border">
-                        <div class="card-header pt-7 border-bottom">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-dark fs-4">Active API Keys</span>
-                                <span class="text-muted mt-1 fw-semibold fs-7">Tokens currently accessing your WhatsApp service</span>
-                            </h3>
+                        <div class="card-header border-bottom align-items-center justify-content-end pt-5 pb-3">
+                            <button type="button" class="btn btn-sm btn-icon btn-light btn-active-light-primary border border-gray-300 w-35px h-35px flex-shrink-0" id="refresh-table-btn" data-bs-toggle="tooltip" title="Refresh table">
+                                <i class="ki-outline ki-arrows-circle fs-3"></i>
+                            </button>
                         </div>
                         <div class="card-body pt-5">
                             
-                            
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center position-relative w-100 me-2">
-                                    <i class="ki-duotone ki-magnifier fs-5 text-gray-900 position-absolute ms-4 z-index-3">
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                    </i>
-                                    <input type="text" id="dt-search" class="form-control form-control-sm form-control-transparent border border-gray-800 text-gray-900 ps-11 pe-4 fs-7 fw-semibold shadow-sm w-100" placeholder="Search tokens..." />
-                                </div>
-                                <button type="button" class="btn btn-sm btn-icon btn-light btn-active-light-primary border border-gray-300 w-35px h-35px flex-shrink-0" id="refresh-table-btn" data-bs-toggle="tooltip" title="Refresh">
-                                    <i class="ki-outline ki-arrows-circle fs-3"></i>
-                                </button>
-                            </div>
+
 
                             <div id="tokens-table-wrapper" class="table-responsive">
                                 <table id="tokens-table" class="table table-row-bordered align-middle fs-6 gy-4 w-100">
@@ -196,15 +183,6 @@
                     }
                     $('[data-bs-toggle="tooltip"]').tooltip({ trigger: 'hover' });
                 }
-            });
-
-            let searchTimer;
-            $('#dt-search').on('input', function () {
-                clearTimeout(searchTimer);
-                let query = $(this).val();
-                searchTimer = setTimeout(function () {
-                    table.search(query).draw();
-                }, 400);
             });
 
             $('#refresh-table-btn').on('click', function () {

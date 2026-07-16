@@ -26,7 +26,16 @@ class WhatsAppMessageDataTable extends DataTable
                 if ($msg->status === 'sent') {
                     return '<span class="badge badge-light-success border border-success">Sent</span>';
                 } elseif ($msg->status === 'failed') {
-                    return '<span class="badge badge-light-danger border border-danger" title="'.e($msg->error_message).'">Failed</span>';
+                    $errorMsg = e($msg->error_message ?? 'No error details available');
+                    return '<div class="d-flex align-items-center gap-2">
+                                <span class="badge badge-light-danger border border-danger">Failed</span>
+                                <a href="javascript:void(0);" class="text-danger view-error-btn" data-error="' . htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8') . '" title="View Logs">
+                                    <i class="ki-outline ki-information-5 fs-4 text-danger"></i>
+                                </a>
+                                <a href="javascript:void(0);" class="text-primary resend-message-btn" data-url="'.route('whatsapp_messages.resend', $msg->id).'" title="Resend Message">
+                                    <i class="ki-outline ki-arrows-circle fs-4 text-primary hover-elevate-up"></i>
+                                </a>
+                            </div>';
                 }
                 return '<span class="badge badge-light-warning border border-warning">'.ucfirst($msg->status).'</span>';
             })

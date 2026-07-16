@@ -40,6 +40,7 @@ class WhatsAppMessageController extends Controller
             'whatsapp_account_id' => 'required|exists:whats_app_accounts,id',
             'receiver_numbers' => 'required|string',
             'message_text' => 'required|string',
+            'media_file' => 'nullable|file|max:16384|mimes:jpg,jpeg,png,gif,mp4,mp3,ogg,pdf,doc,docx,xls,xlsx,zip',
         ]);
 
         $account = WhatsAppAccount::where('user_id', auth()->id())
@@ -64,6 +65,22 @@ class WhatsAppMessageController extends Controller
 
         $queuedCount = 0;
 
+        // Store media file (optional)
+        $mediaPath = null;
+        $mediaType = null;
+        if ($request->hasFile('media_file')) {
+            $mediaPath = $request->file('media_file')->store('messages/media', 'local');
+            $ext = strtolower($request->file('media_file')->getClientOriginalExtension());
+            $typeMap = [
+                'jpg' => 'image', 'jpeg' => 'image', 'png' => 'image', 'gif' => 'image',
+                'mp4' => 'video',
+                'mp3' => 'audio', 'ogg' => 'audio',
+                'pdf' => 'document', 'doc' => 'document', 'docx' => 'document',
+                'xls' => 'document', 'xlsx' => 'document', 'zip' => 'document',
+            ];
+            $mediaType = $typeMap[$ext] ?? 'document';
+        }
+
         foreach ($finalNumbers as $numRaw) {
             $number = preg_replace('/[^0-9]/', '', $numRaw);
             if (empty($number)) continue;
@@ -73,6 +90,8 @@ class WhatsAppMessageController extends Controller
                 'whatsapp_account_id' => $account->id,
                 'receiver_number' => $number,
                 'message_text' => $request->message_text,
+                'media_path' => $mediaPath,
+                'media_type' => $mediaType,
                 'status' => 'pending',
                 'is_bulk' => false,
                 'source' => 'web'
@@ -102,5 +121,22 @@ class WhatsAppMessageController extends Controller
             return response()->json(['success' => true]);
         }
         return back()->with('success', 'Message log deleted.');
+    }
+
+    public function resend($id)
+    {
+        $message = WhatsAppMessage::where('user_id', auth()->id())->findOrFail($id);
+        
+        $message->update([
+            'status' => 'pending',
+            'error_message' => null
+        ]);
+
+        \App\Jobs\ProcessQuickMessage::dispatch($message->id);
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Message queued for resending']);
+        }
+        return back()->with('success', 'Message queued for resending.');
     }
 }

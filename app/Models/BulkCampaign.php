@@ -16,6 +16,7 @@ class BulkCampaign extends Model
         'sent_count',
         'failed_count',
         'status',
+        'media_path',
         'delay_min',
         'delay_max',
     ];

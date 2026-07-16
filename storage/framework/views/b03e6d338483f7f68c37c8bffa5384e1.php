@@ -121,6 +121,14 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                             </div>
                             <!--end::Input group-->
 
+                            <!--begin::Input group-->
+                            <div class="mb-7">
+                                <label class="form-label text-gray-900 fw-semibold">Attach Media (Optional)</label>
+                                <input type="file" name="media_file" id="mediaFile" class="form-control" accept="image/*,video/mp4,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" />
+                                <div class="text-muted fs-7 mt-2">Attach an image, video, audio, or document (Max 16MB).</div>
+                            </div>
+                            <!--end::Input group-->
+
                         </div>
                     </div>
                 </div>
@@ -155,18 +163,20 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
                 btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Sending...');
 
+                let formData = new FormData(this);
+
                 $.ajax({
                     url: form.attr('action'),
                     method: form.attr('method'),
-                    data: form.serialize(),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function(response) {
                         if(response.success) {
                             // Clear form
                             tagifyInstance.removeAllTags();
                             form.find('textarea[name="message_text"]').val('');
-                            
-                            // Reset select to empty or keep it (keeping the sender is usually better)
-                            // form.find('select').val('').trigger('change');
+                            form.find('input[name="media_file"]').val('');
 
                             Swal.fire({
                                 toast: true,

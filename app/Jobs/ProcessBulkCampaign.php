@@ -54,6 +54,28 @@ class ProcessBulkCampaign implements ShouldQueue
                 throw new \Exception("CSV file must contain a 'phone' column.");
             }
 
+            // Resolve media path once (shared between all messages in this campaign)
+            $mediaAbsolutePath = null;
+            $mediaType = null;
+            if ($this->campaign->media_path) {
+                $mediaAbsolutePath = Storage::path($this->campaign->media_path);
+                if (!file_exists($mediaAbsolutePath)) {
+                    Log::warning("Campaign {$this->campaign->id}: Media file not found at {$mediaAbsolutePath}, sending text only.");
+                    $mediaAbsolutePath = null;
+                } else {
+                    // Determine media type from file extension
+                    $ext = strtolower(pathinfo($mediaAbsolutePath, PATHINFO_EXTENSION));
+                    $typeMap = [
+                        'jpg' => 'image', 'jpeg' => 'image', 'png' => 'image', 'gif' => 'image',
+                        'mp4' => 'video',
+                        'mp3' => 'audio', 'ogg' => 'audio',
+                        'pdf' => 'document', 'doc' => 'document', 'docx' => 'document',
+                        'xls' => 'document', 'xlsx' => 'document', 'zip' => 'document',
+                    ];
+                    $mediaType = $typeMap[$ext] ?? 'document';
+                }
+            }
+
             while (($row = fgetcsv($file)) !== false) {
                 // Check if campaign was paused or failed by user
                 $this->campaign->refresh();
@@ -82,18 +104,31 @@ class ProcessBulkCampaign implements ShouldQueue
                     'whatsapp_account_id' => $this->campaign->whatsapp_account_id,
                     'receiver_number' => $phone,
                     'message_text' => $messageText,
+                    'media_path' => $this->campaign->media_path,
+                    'media_type' => $mediaType,
                     'status' => 'pending',
                     'bulk_campaign_id' => $this->campaign->id,
                     'is_bulk' => true,
                     'variables' => $rowVariables
                 ]);
 
-                // Send Message via Service
-                $response = $whatsappService->sendMessage(
-                    $this->campaign->whatsappAccount->session_id,
-                    $phone,
-                    $messageText
-                );
+                // Send Message via Service (media or text)
+                $sessionId = $this->campaign->whatsappAccount->session_id;
+                if ($mediaAbsolutePath) {
+                    $response = $whatsappService->sendMediaMessage(
+                        $sessionId,
+                        $phone,
+                        $mediaAbsolutePath,
+                        $messageText,
+                        basename($mediaAbsolutePath)
+                    );
+                } else {
+                    $response = $whatsappService->sendMessage(
+                        $sessionId,
+                        $phone,
+                        $messageText
+                    );
+                }
 
                 if ($response['success']) {
                     $messageRecord->update(['status' => 'sent']);

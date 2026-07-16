@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('whatsapp-accounts', \App\Http\Controllers\Admin\WhatsAppAccountController::class)->names('whatsapp_accounts');
 
     // WhatsApp Messages
+    Route::post('whatsapp-messages/{id}/resend', [\App\Http\Controllers\Admin\WhatsAppMessageController::class, 'resend'])->name('whatsapp_messages.resend');
     Route::resource('whatsapp-messages', \App\Http\Controllers\Admin\WhatsAppMessageController::class)->only(['index', 'create', 'store', 'destroy'])->names('whatsapp_messages');
     // });
 
