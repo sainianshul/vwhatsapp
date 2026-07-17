@@ -179,24 +179,28 @@ class BulkCampaignController extends Controller
             'Pragma' => 'public'
         ];
 
-        // Fetch first record to get dynamic headers
+        // Fetch first record to get original dynamic headers
         $firstRecord = $query->first();
-        $csvHeaders = ['phone']; // Default fallback
+        $originalHeaders = ['phone']; // Default fallback
         if ($firstRecord && is_array($firstRecord->variables) && count($firstRecord->variables) > 0) {
-            $csvHeaders = array_keys($firstRecord->variables);
+            $originalHeaders = array_keys($firstRecord->variables);
         }
 
-        $callback = function () use ($query, $csvHeaders) {
+        // Add report-specific columns at the end
+        $csvHeaders = array_merge($originalHeaders, ['Status', 'Sent At', 'Error Message']);
+
+        $callback = function () use ($query, $originalHeaders, $csvHeaders) {
             $file = fopen('php://output', 'w');
 
-            // Output exactly the original CSV headers
+            // Output exactly the original CSV headers + report headers
             fputcsv($file, $csvHeaders);
 
             foreach ($query->cursor() as $msg) {
                 $row = [];
                 $variables = is_array($msg->variables) ? $msg->variables : [];
 
-                foreach ($csvHeaders as $header) {
+                // 1. Fill original CSV column values
+                foreach ($originalHeaders as $header) {
                     if (array_key_exists($header, $variables)) {
                         $row[] = $variables[$header];
                     } else if (strtolower($header) === 'phone') {
@@ -205,6 +209,11 @@ class BulkCampaignController extends Controller
                         $row[] = '';
                     }
                 }
+
+                // 2. Fill report data
+                $row[] = ucfirst($msg->status);
+                $row[] = $msg->updated_at ? $msg->updated_at->format('Y-m-d H:i:s') : '';
+                $row[] = $msg->error_message ?? '';
 
                 fputcsv($file, $row);
             }
