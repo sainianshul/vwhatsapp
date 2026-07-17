@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function () {
     // Bulk Messaging Routes
     Route::get('/bulk-campaigns/sample-csv', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'downloadSampleCsv'])->name('admin.bulk_campaigns.sample_csv');
     Route::get('/bulk-campaigns/{bulkCampaign}/export', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'exportCsv'])->name('admin.bulk_campaigns.export');
+    Route::get('/bulk-campaigns/{bulkCampaign}/stats', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'stats'])->name('admin.bulk_campaigns.stats');
     Route::resource('bulk-campaigns', \App\Http\Controllers\Admin\BulkCampaignController::class, [
         'names' => 'admin.bulk_campaigns',
         'only' => ['index', 'create', 'store', 'show']

@@ -16,6 +16,7 @@ class WhatsAppMessage extends Model
         'media_path',
         'media_type',
         'status',
+        'scheduled_at',
         'error_message',
         'bulk_campaign_id',
         'is_bulk',
@@ -24,7 +25,8 @@ class WhatsAppMessage extends Model
     ];
 
     protected $casts = [
-        'variables' => 'array'
+        'variables' => 'array',
+        'scheduled_at' => 'datetime'
     ];
 
     public function user()

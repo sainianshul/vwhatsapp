@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\WhatsAppAccount;
 use App\Models\WhatsAppMessage;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -41,6 +42,7 @@ class WhatsAppMessageController extends Controller
             'receiver_numbers' => 'required|string',
             'message_text' => 'required|string',
             'media_file' => 'nullable|file|max:16384|mimes:jpg,jpeg,png,gif,mp4,mp3,ogg,pdf,doc,docx,xls,xlsx,zip',
+            'scheduled_at' => 'nullable|date|after:now',
         ]);
 
         $account = WhatsAppAccount::where('user_id', auth()->id())
@@ -81,6 +83,9 @@ class WhatsAppMessageController extends Controller
             $mediaType = $typeMap[$ext] ?? 'document';
         }
 
+        $isScheduled = $request->filled('scheduled_at');
+        $scheduledAt = $isScheduled ? Carbon::parse($request->scheduled_at) : null;
+
         foreach ($finalNumbers as $numRaw) {
             $number = preg_replace('/[^0-9]/', '', $numRaw);
             if (empty($number)) continue;
@@ -92,20 +97,26 @@ class WhatsAppMessageController extends Controller
                 'message_text' => $request->message_text,
                 'media_path' => $mediaPath,
                 'media_type' => $mediaType,
-                'status' => 'pending',
+                'status' => $isScheduled ? 'scheduled' : 'pending',
+                'scheduled_at' => $scheduledAt,
                 'is_bulk' => false,
                 'source' => 'web'
             ]);
 
             // Queue the message
-            \App\Jobs\ProcessQuickMessage::dispatch($messageRecord->id);
+            if ($isScheduled) {
+                \App\Jobs\ProcessQuickMessage::dispatch($messageRecord->id)->delay($scheduledAt);
+            } else {
+                \App\Jobs\ProcessQuickMessage::dispatch($messageRecord->id);
+            }
             $queuedCount++;
         }
 
         if ($request->ajax()) {
+            $msg = $isScheduled ? $queuedCount . ' Messages scheduled for ' . $scheduledAt->format('d M Y, h:i A') . '!' : $queuedCount . ' Messages queued for sending!';
             return response()->json([
                 'success' => true,
-                'message' => $queuedCount . ' Messages queued for sending!'
+                'message' => $msg
             ]);
         }
 

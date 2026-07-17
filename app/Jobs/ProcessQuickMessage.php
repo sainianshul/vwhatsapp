@@ -32,7 +32,7 @@ class ProcessQuickMessage implements ShouldQueue
     {
         $messageRecord = WhatsAppMessage::with('whatsappAccount')->find($this->messageId);
 
-        if (!$messageRecord || $messageRecord->status !== 'pending') {
+        if (!$messageRecord || !in_array($messageRecord->status, ['pending', 'scheduled'])) {
             return;
         }
 

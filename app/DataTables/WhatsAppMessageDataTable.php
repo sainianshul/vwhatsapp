@@ -36,6 +36,10 @@ class WhatsAppMessageDataTable extends DataTable
                                     <i class="ki-outline ki-arrows-circle fs-4 text-primary hover-elevate-up"></i>
                                 </a>
                             </div>';
+                } elseif ($msg->status === 'scheduled') {
+                    $scheduledTime = $msg->scheduled_at ? $msg->scheduled_at->format('d M, h:i A') : '';
+                    return '<span class="badge badge-light-info border border-info fw-bold">Scheduled</span>'
+                         . ($scheduledTime ? '<div class="text-muted fs-8 mt-1">' . $scheduledTime . '</div>' : '');
                 }
                 return '<span class="badge badge-light-warning border border-warning">'.ucfirst($msg->status).'</span>';
             })

@@ -113,6 +113,21 @@ class BulkCampaignController extends Controller
         return $dataTable->withCampaignId($bulkCampaign->id)->render('admin.bulk_campaigns.show', compact('bulkCampaign'));
     }
 
+    public function stats(BulkCampaign $bulkCampaign)
+    {
+        if ($bulkCampaign->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'status' => $bulkCampaign->status,
+            'total_contacts' => $bulkCampaign->total_contacts,
+            'sent_count' => $bulkCampaign->sent_count,
+            'failed_count' => $bulkCampaign->failed_count,
+            'status_label' => ucfirst($bulkCampaign->status)
+        ]);
+    }
+
     public function downloadSampleCsv()
     {
         $headers = [

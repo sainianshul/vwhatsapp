@@ -103,6 +103,14 @@
                             </div>
                             <!--end::Input group-->
 
+                            <!--begin::Input group-->
+                            <div class="mb-7">
+                                <label class="form-label text-gray-900 fw-semibold">Schedule At (Optional)</label>
+                                <input type="datetime-local" name="scheduled_at" id="scheduledAt" class="form-control text-gray-900 bg-transparent border border-gray-300" />
+                                <div class="text-muted fs-7 mt-2">Leave empty to send immediately.</div>
+                            </div>
+                            <!--end::Input group-->
+
                         </div>
                     </div>
                 </div>
@@ -176,6 +184,18 @@
                         btn.prop('disabled', false).html(originalText);
                     }
                 });
+            });
+
+            // Schedule At: Dynamic button text
+            $('#scheduledAt').on('change', function() {
+                let btn = $('#btn-send-msg');
+                if ($(this).val()) {
+                    btn.html('<i class="ki-outline ki-calendar fs-4 me-1"></i> Schedule Message');
+                    btn.removeClass('btn-primary').addClass('btn-warning text-dark');
+                } else {
+                    btn.html('<i class="ki-outline ki-send fs-4 me-1"></i> Send Message');
+                    btn.removeClass('btn-warning text-dark').addClass('btn-primary');
+                }
             });
         });
     </script>
