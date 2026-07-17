@@ -42,7 +42,7 @@ class BulkCampaignController extends Controller
 
         // Store CSV file
         $path = $request->file('csv_file')->store('campaigns/csv', 'local');
-        
+
         // Count total contacts (basic count)
         $file = fopen(Storage::path($path), 'r');
         $headers = fgetcsv($file); // Skip header
@@ -131,15 +131,15 @@ class BulkCampaignController extends Controller
     public function downloadSampleCsv()
     {
         $headers = [
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
-            'Content-type'        => 'text/csv',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Content-type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename=sample_contacts.csv',
-            'Expires'             => '0',
-            'Pragma'              => 'public'
+            'Expires' => '0',
+            'Pragma' => 'public'
         ];
 
         $list = [
-            ['phone', 'name', 'var1', 'var2'],
+            ['phone', 'name', 'Offer', 'Month'],
             ['919876543210', 'Rahul Kumar', 'Discount20', 'July'],
             ['919876543211', 'Anjali Singh', 'Offer50', 'August']
         ];
@@ -162,9 +162,9 @@ class BulkCampaignController extends Controller
         }
 
         $status = $request->query('status', 'all');
-        
+
         $query = \App\Models\WhatsAppMessage::where('bulk_campaign_id', $bulkCampaign->id);
-        
+
         if ($status && $status !== 'all') {
             $query->where('status', $status);
         }
@@ -172,11 +172,11 @@ class BulkCampaignController extends Controller
         $fileName = 'campaign_' . $bulkCampaign->id . '_' . $status . '_report.csv';
 
         $headers = [
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
-            'Content-type'        => 'text/csv',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Content-type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
-            'Expires'             => '0',
-            'Pragma'              => 'public'
+            'Expires' => '0',
+            'Pragma' => 'public'
         ];
 
         // Fetch first record to get dynamic headers
@@ -186,16 +186,16 @@ class BulkCampaignController extends Controller
             $csvHeaders = array_keys($firstRecord->variables);
         }
 
-        $callback = function() use ($query, $csvHeaders) {
+        $callback = function () use ($query, $csvHeaders) {
             $file = fopen('php://output', 'w');
-            
+
             // Output exactly the original CSV headers
             fputcsv($file, $csvHeaders);
-            
+
             foreach ($query->cursor() as $msg) {
                 $row = [];
                 $variables = is_array($msg->variables) ? $msg->variables : [];
-                
+
                 foreach ($csvHeaders as $header) {
                     if (array_key_exists($header, $variables)) {
                         $row[] = $variables[$header];
@@ -205,7 +205,7 @@ class BulkCampaignController extends Controller
                         $row[] = '';
                     }
                 }
-                
+
                 fputcsv($file, $row);
             }
             fclose($file);
