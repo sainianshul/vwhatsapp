@@ -159,9 +159,9 @@ class BulkCampaignController extends Controller
         ];
 
         $list = [
-            ['phone', 'name', 'Offer', 'Month'],
-            ['919876543210', 'Rahul Kumar', 'Discount20', 'July'],
-            ['919876543211', 'Anjali Singh', 'Offer50', 'August']
+            ['phone', 'name', 'Offer', 'Month', 'media_code'],
+            ['919876543210', 'Rahul Kumar', 'Discount20', 'July', ''],
+            ['919876543211', 'Anjali Singh', 'Offer50', 'August', '']
         ];
 
         $callback = function () use ($list) {
