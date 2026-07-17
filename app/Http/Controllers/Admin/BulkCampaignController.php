@@ -179,8 +179,8 @@ class BulkCampaignController extends Controller
             'Pragma' => 'public'
         ];
 
-        // Fetch first record to get original dynamic headers
-        $firstRecord = $query->first();
+        // Fetch first record to get original dynamic headers (clone query to avoid LIMIT 1 bug)
+        $firstRecord = (clone $query)->first();
         $originalHeaders = ['phone']; // Default fallback
         if ($firstRecord && is_array($firstRecord->variables) && count($firstRecord->variables) > 0) {
             $originalHeaders = array_keys($firstRecord->variables);
