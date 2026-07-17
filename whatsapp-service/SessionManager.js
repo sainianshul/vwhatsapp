@@ -7,6 +7,7 @@ class SessionManager {
         this.qrCodes = new Map();
         this.userInfo = new Map();
         this.timeouts = new Map();
+        this.bootTimeouts = new Map(); // Tracks boot deadlines per session
     }
 
     /**
@@ -102,12 +103,27 @@ class SessionManager {
         // Store the session BEFORE initializing
         this.sessions.set(sessionId, client);
 
+        // ─── Boot Timeout (3 minutes) ───
+        // If session doesn't reach 'connected' within 3 minutes, it's dead/stuck.
+        // Clean it up so it doesn't show 'booting up' forever.
+        const BOOT_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
+        const bootTimer = setTimeout(() => {
+            const currentStatus = this.status.get(sessionId);
+            if (currentStatus && currentStatus !== 'connected') {
+                console.error(`[SessionManager] Boot Timeout (3 min): Session ${sessionId} stuck at '${currentStatus}'. Cleaning up.`);
+                this._cleanupSession(sessionId);
+                this.status.set(sessionId, 'error'); // Override disconnected with error
+            }
+        }, BOOT_TIMEOUT_MS);
+        this.bootTimeouts.set(sessionId, bootTimer);
+
         // Initialize — wrapped in proper error handling
         client.initialize().catch(err => {
             console.error(`[SessionManager] Failed to initialize session ${sessionId}:`, err.message);
             this.status.set(sessionId, 'error');
             this.sessions.delete(sessionId);
             this.clearSessionTimeout(sessionId);
+            this.clearBootTimeout(sessionId);
             // Try to kill the browser if it was partially started
             try { client.destroy(); } catch (e) {}
         });
@@ -155,6 +171,7 @@ class SessionManager {
 
                 // NOW mark as connected — user info is guaranteed to be available
                 this.status.set(sessionId, 'connected');
+                this.clearBootTimeout(sessionId); // Session is healthy, cancel boot timeout
                 console.log(`[SessionManager] Session ${sessionId} is now fully connected with user info.`);
             } catch (err) {
                 console.error(`[SessionManager] Error extracting user info:`, err.message);
@@ -178,6 +195,7 @@ class SessionManager {
         this.qrCodes.delete(sessionId);
         this.userInfo.delete(sessionId);
         this.clearSessionTimeout(sessionId);
+        this.clearBootTimeout(sessionId);
 
         if (client) {
             try { await client.destroy(); } catch (e) {}
@@ -192,6 +210,16 @@ class SessionManager {
         if (this.timeouts.has(sessionId)) {
             clearTimeout(this.timeouts.get(sessionId));
             this.timeouts.delete(sessionId);
+        }
+    }
+
+    /**
+     * Clear the boot timeout for a session (called when session becomes connected)
+     */
+    clearBootTimeout(sessionId) {
+        if (this.bootTimeouts.has(sessionId)) {
+            clearTimeout(this.bootTimeouts.get(sessionId));
+            this.bootTimeouts.delete(sessionId);
         }
     }
 
@@ -214,6 +242,9 @@ class SessionManager {
         const client = this.sessions.get(sessionId);
         const currentStatus = this.status.get(sessionId);
 
+        if (currentStatus === 'error') {
+            throw new Error('Session failed to connect. Please reconnect the account from the dashboard.');
+        }
         if (currentStatus === 'initializing' || currentStatus === 'authenticating') {
             throw new Error('Session is currently booting up. Please try again in 5-10 seconds.');
         }
@@ -246,6 +277,9 @@ class SessionManager {
         const client = this.sessions.get(sessionId);
         const currentStatus = this.status.get(sessionId);
 
+        if (currentStatus === 'error') {
+            throw new Error('Session failed to connect. Please reconnect the account from the dashboard.');
+        }
         if (currentStatus === 'initializing' || currentStatus === 'authenticating') {
             throw new Error('Session is currently booting up. Please try again in 5-10 seconds.');
         }

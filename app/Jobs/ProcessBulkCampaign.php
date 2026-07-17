@@ -125,22 +125,62 @@ class ProcessBulkCampaign implements ShouldQueue
                     'variables' => $rowVariables
                 ]);
 
-                // Send Message via Service (media or text)
+                // Send Message via Service (media or text) — with Auto-Retry for Boot Errors
                 $sessionId = $this->campaign->whatsappAccount->session_id;
-                if ($mediaAbsolutePath) {
-                    $response = $whatsappService->sendMediaMessage(
-                        $sessionId,
-                        $phone,
-                        $mediaAbsolutePath,
-                        $messageText,
-                        $this->campaign->media_filename ?? basename($mediaAbsolutePath)
-                    );
-                } else {
-                    $response = $whatsappService->sendMessage(
-                        $sessionId,
-                        $phone,
-                        $messageText
-                    );
+                $response = null;
+                $maxRetries = 12; // 12 retries × 15 sec = 3 minutes max wait
+                $retryDelay = 15; // seconds
+
+                for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                    if ($mediaAbsolutePath) {
+                        $response = $whatsappService->sendMediaMessage(
+                            $sessionId,
+                            $phone,
+                            $mediaAbsolutePath,
+                            $messageText,
+                            $this->campaign->media_filename ?? basename($mediaAbsolutePath)
+                        );
+                    } else {
+                        $response = $whatsappService->sendMessage(
+                            $sessionId,
+                            $phone,
+                            $messageText
+                        );
+                    }
+
+                    // If success or a permanent error (invalid number, file too large, etc.) — stop retrying
+                    if ($response['success']) {
+                        break;
+                    }
+
+                    $errorMsg = $response['error'] ?? '';
+
+                    // Session permanently dead — stop entire campaign, no point retrying
+                    if (str_contains($errorMsg, 'failed to connect') || str_contains($errorMsg, 'reconnect the account')) {
+                        Log::error("Campaign {$this->campaign->id}: Session is permanently dead. Stopping campaign.");
+                        $messageRecord->update(['status' => 'failed', 'error_message' => $errorMsg]);
+                        $this->campaign->increment('failed_count');
+                        $this->campaign->update(['status' => 'failed']);
+                        fclose($file);
+                        return; // Exit the entire job
+                    }
+
+                    // Temporary boot error — retry after delay
+                    $isBootError = str_contains($errorMsg, 'booting up') || str_contains($errorMsg, 'not connected');
+
+                    if (!$isBootError) {
+                        break; // Real error (e.g., invalid number) — don't retry
+                    }
+
+                    // Session is still booting — wait and retry
+                    Log::warning("Campaign {$this->campaign->id}: Session booting (attempt {$attempt}/{$maxRetries}), waiting {$retryDelay}s before retry for {$phone}.");
+                    sleep($retryDelay);
+
+                    // Re-check if campaign was cancelled during the wait
+                    $this->campaign->refresh();
+                    if ($this->campaign->trashed() || $this->campaign->status !== 'running') {
+                        break 2; // Exit both the retry loop and the main CSV loop
+                    }
                 }
 
                 if ($response['success']) {
