@@ -14,6 +14,9 @@ services:
 
     working_dir: /var/www
 
+    environment:
+      - TZ=Asia/Kolkata
+
     volumes:
       - ./:/var/www
 
@@ -34,6 +37,9 @@ services:
     command: php artisan queue:work --sleep=3 --tries=3
 
     working_dir: /var/www
+
+    environment:
+      - TZ=Asia/Kolkata
 
     volumes:
       - ./:/var/www
@@ -72,6 +78,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_PASSWORD: root
       MYSQL_USER: laravel
+      TZ: Asia/Kolkata
 
     ports:
       - "3308:3306"
@@ -113,6 +120,7 @@ services:
     environment:
       - NODE_ENV=production
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+      - TZ=Asia/Kolkata
       
     volumes:
       - ./whatsapp-service/.wwebjs_auth:/app/.wwebjs_auth
