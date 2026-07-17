@@ -49,6 +49,12 @@ class BulkCampaignDataTable extends DataTable
 
     public function query(BulkCampaign $model)
     {
-        return $model->newQuery()->where('user_id', auth()->id());
+        $query = $model->newQuery()->where('user_id', auth()->id());
+        
+        if (request()->filled('account_id')) {
+            $query->where('whatsapp_account_id', request('account_id'));
+        }
+
+        return $query;
     }
 }
