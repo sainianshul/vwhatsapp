@@ -30,6 +30,14 @@
                 {{-- Right Controls --}}
                 <div class="d-flex align-items-center gap-2">
 
+                    {{-- Date Filters --}}
+                    <div style="width: 130px;">
+                        <input type="date" id="filter-from-date" class="form-control form-control-transparent border border-gray-800 text-gray-900 form-control-sm fw-semibold shadow-sm" title="From Date" />
+                    </div>
+                    <div style="width: 130px;">
+                        <input type="date" id="filter-to-date" class="form-control form-control-transparent border border-gray-800 text-gray-900 form-control-sm fw-semibold shadow-sm" title="To Date" />
+                    </div>
+
                     {{-- Account Filter --}}
                     <div style="width: 145px;">
                         <div class="position-relative">
@@ -175,6 +183,8 @@
                     data: function(d) {
                         d.status = $('#filter-status').val();
                         d.account_id = $('#filter-account').val();
+                        d.from_date = $('#filter-from-date').val();
+                        d.to_date = $('#filter-to-date').val();
                     }
                 },
                 columns: [
@@ -241,7 +251,7 @@
                 }, 400);
             });
 
-            $('#filter-status, #filter-account').on('change', function() {
+            $('#filter-status, #filter-account, #filter-from-date, #filter-to-date').on('change', function() {
                 table.draw();
             });
 
