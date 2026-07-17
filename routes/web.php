@@ -27,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bulk-campaigns/{bulkCampaign}/stats', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'stats'])->name('admin.bulk_campaigns.stats');
     Route::resource('bulk-campaigns', \App\Http\Controllers\Admin\BulkCampaignController::class, [
         'names' => 'admin.bulk_campaigns',
-        'only' => ['index', 'create', 'store', 'show']
+        'only' => ['index', 'create', 'store', 'show', 'destroy']
     ]);
 
     // Developer Settings

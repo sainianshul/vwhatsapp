@@ -12,9 +12,14 @@ class BulkCampaignDataTable extends DataTable
         return datatables()
             ->eloquent($query)
             ->addColumn('campaign_name', function (BulkCampaign $campaign) {
+                $mediaBadge = '';
+                if ($campaign->media_path) {
+                    $mediaBadge = '<div class="mt-1"><span class="badge badge-light-primary fw-bold px-2 py-1 fs-8" title="This campaign includes media"><i class="ki-outline ki-file text-primary fs-7 me-1"></i>With Media</span></div>';
+                }
                 return '
                     <div class="d-flex flex-column">
                         <span class="text-gray-800 fw-bold">'.e($campaign->campaign_name).'</span>
+                        ' . $mediaBadge . '
                     </div>
                 ';
             })
@@ -41,6 +46,13 @@ class BulkCampaignDataTable extends DataTable
                         <a href="'.route('admin.bulk_campaigns.show', $campaign->id).'" class="btn btn-sm btn-icon btn-light-primary border border-primary w-30px h-30px" title="View Report">
                             <i class="ki-outline ki-eye fs-5"></i>
                         </a>
+                        <form action="'.route('admin.bulk_campaigns.destroy', $campaign->id).'" method="POST" class="d-inline" onsubmit="return confirm(\'Are you sure you want to delete this campaign?\');">
+                            '.csrf_field().'
+                            '.method_field('DELETE').'
+                            <button type="submit" class="btn btn-sm btn-icon btn-light-danger border border-danger w-30px h-30px" title="Delete Campaign">
+                                <i class="ki-outline ki-trash fs-5"></i>
+                            </button>
+                        </form>
                     </div>
                 ';
             })

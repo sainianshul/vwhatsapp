@@ -234,4 +234,15 @@ class BulkCampaignController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    public function destroy(BulkCampaign $bulkCampaign)
+    {
+        if ($bulkCampaign->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $bulkCampaign->delete();
+
+        return redirect()->route('admin.bulk_campaigns.index')->with('success', 'Campaign deleted successfully.');
+    }
 }

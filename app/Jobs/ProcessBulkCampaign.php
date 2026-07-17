@@ -82,9 +82,9 @@ class ProcessBulkCampaign implements ShouldQueue
             }
 
             while (($row = fgetcsv($file)) !== false) {
-                // Check if campaign was paused or failed by user
+                // Check if campaign was paused, failed, or soft-deleted
                 $this->campaign->refresh();
-                if ($this->campaign->status !== 'running') {
+                if ($this->campaign->trashed() || $this->campaign->status !== 'running') {
                     break;
                 }
 
