@@ -79,11 +79,27 @@
                                     </div>
                                     <input type="file" name="media_file" id="mediaFile" class="form-control" accept="image/*,video/mp4,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" />
                                     <div class="text-muted fs-7 mt-2">Attach an image, video, audio, or document (Max 16MB). This media will be sent to all contacts.</div>
+                                    <!-- Media Preview -->
+                                    <div id="mediaPreview" class="mt-3 d-none">
+                                        <img id="mediaPreviewImg" src="" class="rounded border d-none" style="max-height: 120px; max-width: 200px;" />
+                                        <div id="mediaPreviewFile" class="d-none badge badge-light-primary border border-primary px-3 py-2 fs-7">
+                                            <i class="ki-outline ki-file fs-5 me-1"></i> <span id="mediaPreviewFileName"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="mb-7">
-                                    <label class="required form-label fw-semibold">Message Template</label>
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="required form-label fw-semibold mb-0">Message Template</label>
+                                        <span id="charCount" class="text-muted fs-8">0 / 4096</span>
+                                    </div>
                                     <textarea name="message_template" id="messageTemplate" class="form-control" rows="6" placeholder="Hi @{{name}}, here is your special offer!" required>{{ old('message_template') }}</textarea>
+                                </div>
+
+                                <!-- Variable Buttons (appear after CSV upload) -->
+                                <div id="variableButtons" class="mb-7 d-none">
+                                    <label class="form-label fw-semibold text-muted fs-7">Click to insert variable:</label>
+                                    <div id="variableButtonsContainer" class="d-flex flex-wrap gap-2"></div>
                                 </div>
 
                             </div>
@@ -100,6 +116,14 @@
                             </div>
                             <div class="card-body border-top p-9">
                                 
+                                <!-- Schedule At -->
+                                <h4 class="fs-5 fw-bold text-gray-800 mb-4">Schedule</h4>
+                                <div class="mb-7">
+                                    <label class="form-label fw-semibold fs-7">Schedule At (Optional)</label>
+                                    <input type="datetime-local" name="scheduled_at" id="scheduledAt" class="form-control form-control-sm" value="{{ old('scheduled_at') }}" />
+                                    <div class="text-muted fs-8 mt-2">Leave empty to send immediately.</div>
+                                </div>
+
                                 <!-- Anti Ban Settings -->
                                 <h4 class="fs-5 fw-bold text-gray-800 mb-4">Anti-Ban Delays</h4>
                                 <div class="row mb-7">
@@ -134,7 +158,7 @@
 
                             </div>
                             <div class="card-footer d-flex justify-content-end py-6 px-9">
-                                <button type="submit" class="btn btn-primary">Start Campaign</button>
+                                <button type="submit" id="submitBtn" class="btn btn-primary">Start Campaign</button>
                             </div>
                         </div>
                     </div>
@@ -150,11 +174,18 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const fileInput = document.getElementById('csvFile');
+        const mediaInput = document.getElementById('mediaFile');
         const messageInput = document.getElementById('messageTemplate');
         const previewBox = document.getElementById('previewBox');
+        const charCount = document.getElementById('charCount');
+        const variableButtons = document.getElementById('variableButtons');
+        const variableButtonsContainer = document.getElementById('variableButtonsContainer');
+        const scheduledAtInput = document.getElementById('scheduledAt');
+        const submitBtn = document.getElementById('submitBtn');
+        let csvHeaders = [];
         let firstRowVariables = {};
 
-        // Parse first row of CSV when selected
+        // ─── CSV Upload: Parse headers + first row ───
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -162,24 +193,115 @@
             const reader = new FileReader();
             reader.onload = function(event) {
                 const text = event.target.result;
-                const rows = text.split('\n');
+                // Use a proper CSV line parser that handles quoted values
+                const rows = parseCSVLines(text);
                 if (rows.length > 1) {
-                    const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-                    const firstData = rows[1].split(',').map(d => d.trim());
+                    csvHeaders = rows[0].map(h => h.trim().toLowerCase());
+                    const firstData = rows[1];
                     
                     firstRowVariables = {};
-                    headers.forEach((header, index) => {
-                        if (firstData[index]) {
-                            firstRowVariables[header] = firstData[index];
+                    csvHeaders.forEach((header, index) => {
+                        if (firstData[index] !== undefined) {
+                            firstRowVariables[header] = firstData[index].trim();
                         }
                     });
+
+                    // Render variable buttons
+                    renderVariableButtons(csvHeaders);
                     updatePreview();
                 }
             };
             reader.readAsText(file);
         });
 
-        messageInput.addEventListener('input', updatePreview);
+        // ─── Proper CSV parser (handles quoted commas) ───
+        function parseCSVLines(text) {
+            const rows = [];
+            let current = [];
+            let field = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                const next = text[i + 1];
+
+                if (inQuotes) {
+                    if (ch === '"' && next === '"') {
+                        field += '"';
+                        i++; // skip escaped quote
+                    } else if (ch === '"') {
+                        inQuotes = false;
+                    } else {
+                        field += ch;
+                    }
+                } else {
+                    if (ch === '"') {
+                        inQuotes = true;
+                    } else if (ch === ',') {
+                        current.push(field);
+                        field = '';
+                    } else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+                        current.push(field);
+                        field = '';
+                        if (current.length > 0) rows.push(current);
+                        current = [];
+                        if (ch === '\r') i++; // skip \n in \r\n
+                    } else {
+                        field += ch;
+                    }
+                }
+            }
+            // Push last row
+            if (field || current.length > 0) {
+                current.push(field);
+                rows.push(current);
+            }
+            return rows;
+        }
+
+        // ─── Render variable buttons ───
+        function renderVariableButtons(headers) {
+            variableButtonsContainer.innerHTML = '';
+            headers.forEach(header => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm btn-light-primary border border-primary fw-semibold';
+                btn.innerHTML = '<i class="ki-outline ki-plus fs-7 me-1"></i>' + header;
+                btn.addEventListener('click', function() {
+                    insertAtCursor(messageInput, '@{{' + header + '}}');
+                    updatePreview();
+                });
+                variableButtonsContainer.appendChild(btn);
+            });
+            variableButtons.classList.remove('d-none');
+        }
+
+        // ─── Insert text at cursor position ───
+        function insertAtCursor(textarea, text) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const before = textarea.value.substring(0, start);
+            const after = textarea.value.substring(end);
+            textarea.value = before + text + after;
+            // Place cursor after inserted text
+            textarea.selectionStart = textarea.selectionEnd = start + text.length;
+            textarea.focus();
+            // Trigger input event for char counter
+            textarea.dispatchEvent(new Event('input'));
+        }
+
+        // ─── Message Input: Update preview + char counter ───
+        messageInput.addEventListener('input', function() {
+            updateCharCount();
+            updatePreview();
+        });
+
+        function updateCharCount() {
+            const len = messageInput.value.length;
+            charCount.textContent = len + ' / 4096';
+            charCount.classList.toggle('text-danger', len > 4096);
+            charCount.classList.toggle('text-muted', len <= 4096);
+        }
 
         function updatePreview() {
             let text = messageInput.value;
@@ -190,13 +312,60 @@
 
             if (Object.keys(firstRowVariables).length > 0) {
                 for (const [key, value] of Object.entries(firstRowVariables)) {
-                    // Use @{{ to prevent Laravel Blade from parsing it as PHP
-                    const regex = new RegExp(`@{{${key}}}`, 'gi');
+                    const regex = new RegExp(`@\\{\\{${key}\\}\\}`, 'gi');
                     text = text.replace(regex, `<span class="badge badge-light-primary px-1">${value}</span>`);
                 }
             }
             previewBox.innerHTML = text;
         }
+
+        // ─── Media Preview ───
+        mediaInput.addEventListener('change', function() {
+            const file = this.files[0];
+            const mediaPreview = document.getElementById('mediaPreview');
+            const mediaPreviewImg = document.getElementById('mediaPreviewImg');
+            const mediaPreviewFile = document.getElementById('mediaPreviewFile');
+            const mediaPreviewFileName = document.getElementById('mediaPreviewFileName');
+
+            if (!file) {
+                mediaPreview.classList.add('d-none');
+                return;
+            }
+
+            mediaPreview.classList.remove('d-none');
+
+            if (file.type.startsWith('image/')) {
+                // Show image thumbnail
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    mediaPreviewImg.src = e.target.result;
+                    mediaPreviewImg.classList.remove('d-none');
+                    mediaPreviewFile.classList.add('d-none');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Show filename badge
+                mediaPreviewImg.classList.add('d-none');
+                mediaPreviewFile.classList.remove('d-none');
+                mediaPreviewFileName.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
+            }
+        });
+
+        // ─── Schedule At: Dynamic button text ───
+        scheduledAtInput.addEventListener('change', function() {
+            if (this.value) {
+                submitBtn.textContent = 'Schedule Campaign';
+                submitBtn.classList.remove('btn-primary');
+                submitBtn.classList.add('btn-warning');
+            } else {
+                submitBtn.textContent = 'Start Campaign';
+                submitBtn.classList.remove('btn-warning');
+                submitBtn.classList.add('btn-primary');
+            }
+        });
+
+        // Init char counter
+        updateCharCount();
     });
 </script>
 @endpush

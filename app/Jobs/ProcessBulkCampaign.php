@@ -35,6 +35,11 @@ class ProcessBulkCampaign implements ShouldQueue
     {
         $this->campaign->update(['status' => 'running']);
 
+        // Log if this was a scheduled campaign
+        if ($this->campaign->scheduled_at) {
+            Log::info("Scheduled Campaign {$this->campaign->id} is now running (was scheduled for {$this->campaign->scheduled_at}).");
+        }
+
         try {
             $filePath = Storage::path($this->campaign->csv_file_path);
             $file = fopen($filePath, 'r');
@@ -97,6 +102,14 @@ class ProcessBulkCampaign implements ShouldQueue
                     $messageText = str_ireplace('{{' . $header . '}}', $val, $messageText);
                     $rowVariables[$header] = $val;
                 }
+
+                // Warn if unreplaced variables remain (CSV was missing that column)
+                if (preg_match('/\{\{\w+\}\}/', $messageText)) {
+                    Log::warning("Campaign {$this->campaign->id}: Message for {$phone} has unreplaced variables: {$messageText}");
+                }
+
+                // Sanitize phone number (strip spaces, dashes, plus signs)
+                $phone = preg_replace('/[^0-9]/', '', $phone);
 
                 // Create Message Record
                 $messageRecord = WhatsAppMessage::create([

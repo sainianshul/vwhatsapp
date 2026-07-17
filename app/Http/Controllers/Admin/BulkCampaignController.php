@@ -8,6 +8,7 @@ use App\Models\WhatsAppAccount;
 use App\Jobs\ProcessBulkCampaign;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class BulkCampaignController extends Controller
 {
@@ -30,6 +31,7 @@ class BulkCampaignController extends Controller
             'message_template' => 'required|string',
             'csv_file' => 'required|file|mimes:csv,txt|max:10240', // 10MB
             'media_file' => 'nullable|file|max:16384|mimes:jpg,jpeg,png,gif,mp4,mp3,ogg,pdf,doc,docx,xls,xlsx,zip', // 16MB
+            'scheduled_at' => 'nullable|date|after:now',
             'delay_min' => 'required|integer|min:1',
             'delay_max' => 'required|integer|gt:delay_min',
         ]);
@@ -71,6 +73,10 @@ class BulkCampaignController extends Controller
             $mediaPath = $request->file('media_file')->store('campaigns/media', 'local');
         }
 
+        // Determine if scheduled or immediate
+        $isScheduled = $request->filled('scheduled_at');
+        $scheduledAt = $isScheduled ? Carbon::parse($request->scheduled_at) : null;
+
         // Create campaign
         $campaign = BulkCampaign::create([
             'user_id' => auth()->id(),
@@ -80,15 +86,22 @@ class BulkCampaignController extends Controller
             'csv_file_path' => $path,
             'media_path' => $mediaPath,
             'total_contacts' => $totalContacts,
-            'status' => 'pending',
+            'status' => $isScheduled ? 'scheduled' : 'pending',
+            'scheduled_at' => $scheduledAt,
             'delay_min' => $request->delay_min,
             'delay_max' => $request->delay_max,
         ]);
 
-        // Dispatch Job
-        ProcessBulkCampaign::dispatch($campaign);
+        // Dispatch Job (with delay if scheduled)
+        if ($isScheduled) {
+            ProcessBulkCampaign::dispatch($campaign)->delay($scheduledAt);
+            $successMsg = 'Campaign scheduled for ' . $scheduledAt->format('d M Y, h:i A') . '!';
+        } else {
+            ProcessBulkCampaign::dispatch($campaign);
+            $successMsg = 'Campaign created and queued for sending!';
+        }
 
-        return redirect()->route('admin.bulk_campaigns.index')->with('success', 'Campaign created and queued for sending!');
+        return redirect()->route('admin.bulk_campaigns.index')->with('success', $successMsg);
     }
 
     public function show(BulkCampaign $bulkCampaign, \App\DataTables\BulkCampaignReportDataTable $dataTable)

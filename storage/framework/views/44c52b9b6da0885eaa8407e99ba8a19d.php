@@ -51,6 +51,14 @@
                 <div class="d-flex align-items-center gap-2">
 
                     
+                    <div style="width: 130px;">
+                        <input type="date" id="filter-from-date" class="form-control form-control-transparent border border-gray-800 text-gray-900 form-control-sm fw-semibold shadow-sm" title="From Date" />
+                    </div>
+                    <div style="width: 130px;">
+                        <input type="date" id="filter-to-date" class="form-control form-control-transparent border border-gray-800 text-gray-900 form-control-sm fw-semibold shadow-sm" title="To Date" />
+                    </div>
+
+                    
                     <div style="width: 145px;">
                         <div class="position-relative">
                             <i class="ki-duotone ki-filter fs-5 text-gray-900 position-absolute top-50 start-0 translate-middle-y ms-4 z-index-3">
@@ -154,6 +162,28 @@
         </div>
     </div>
 
+    <!-- Error Log Modal -->
+    <div class="modal fade" tabindex="-1" id="error-modal">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-sm border border-danger">
+                <div class="modal-header border-bottom border-gray-200 bg-light-danger">
+                    <h3 class="modal-title text-danger fw-bold"><i class="ki-outline ki-information-5 text-danger fs-2 me-2"></i>Error Details</h3>
+                    <div class="btn btn-icon btn-sm btn-active-light-danger ms-2" data-bs-dismiss="modal">
+                        <i class="ki-outline ki-cross fs-1"></i>
+                    </div>
+                </div>
+                <div class="modal-body p-6">
+                    <div class="border border-danger border-dashed rounded p-4 bg-light-danger">
+                        <div id="modal-error-text" class="text-danger fs-6 fw-semibold font-monospace" style="white-space: pre-wrap; word-break: break-word;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-gray-200 p-4">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('datatables_css'); ?>
@@ -173,6 +203,8 @@
                     data: function(d) {
                         d.status = $('#filter-status').val();
                         d.account_id = $('#filter-account').val();
+                        d.from_date = $('#filter-from-date').val();
+                        d.to_date = $('#filter-to-date').val();
                     }
                 },
                 columns: [
@@ -239,7 +271,7 @@
                 }, 400);
             });
 
-            $('#filter-status, #filter-account').on('change', function() {
+            $('#filter-status, #filter-account, #filter-from-date, #filter-to-date').on('change', function() {
                 table.draw();
             });
 
@@ -259,6 +291,27 @@
             $(document).on('click', '.view-message-btn', function() {
                 $('#modal-message-text').text($(this).data('message'));
                 $('#message-modal').modal('show');
+            });
+
+            $(document).on('click', '.view-error-btn', function() {
+                let errorData = $(this).data('error');
+                $('#modal-error-text').text(errorData);
+                $('#error-modal').modal('show');
+            });
+
+            $(document).on('click', '.resend-message-btn', function () {
+                let url = $(this).data('url');
+                
+                $.post(url, {
+                    _token: '<?php echo e(csrf_token()); ?>'
+                })
+                .done(function (res) {
+                    table.ajax.reload(null, false);
+                    Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: res.message || 'Message queued for resending' });
+                })
+                .fail(function (xhr) {
+                    toastr.error(xhr.responseJSON?.message || 'Something went wrong.');
+                });
             });
 
             $(document).on('click', '.btn-delete', function () {

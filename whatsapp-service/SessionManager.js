@@ -259,6 +259,16 @@ class SessionManager {
             throw new Error(`Media file not found at path: ${mediaPath}`);
         }
 
+        // Verify file size (WhatsApp limit is 16MB for most media types)
+        const MAX_FILE_SIZE = 16 * 1024 * 1024; // 16MB in bytes
+        const fileStats = fs.statSync(mediaPath);
+        if (fileStats.size > MAX_FILE_SIZE) {
+            throw new Error(`Media file is too large (${(fileStats.size / 1024 / 1024).toFixed(1)}MB). Maximum allowed is 16MB.`);
+        }
+        if (fileStats.size === 0) {
+            throw new Error(`Media file is empty (0 bytes): ${mediaPath}`);
+        }
+
         let cleanTo = to.replace(/[^0-9]/g, '');
         const formattedTo = `${cleanTo}@c.us`;
 

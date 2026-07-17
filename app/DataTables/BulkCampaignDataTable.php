@@ -25,6 +25,10 @@ class BulkCampaignDataTable extends DataTable
                     return '<span class="badge badge-light-primary border border-primary fw-bold">Running</span>';
                 } elseif ($campaign->status === 'failed') {
                     return '<span class="badge badge-light-danger border border-danger fw-bold">Failed</span>';
+                } elseif ($campaign->status === 'scheduled') {
+                    $scheduledTime = $campaign->scheduled_at ? $campaign->scheduled_at->format('d M, h:i A') : '';
+                    return '<span class="badge badge-light-info border border-info fw-bold">Scheduled</span>'
+                         . ($scheduledTime ? '<div class="text-muted fs-8 mt-1">' . $scheduledTime . '</div>' : '');
                 }
                 return '<span class="badge badge-light-warning border border-warning fw-bold">'.ucfirst($campaign->status ?: 'Pending').'</span>';
             })

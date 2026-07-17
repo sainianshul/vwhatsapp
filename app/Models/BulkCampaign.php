@@ -17,8 +17,13 @@ class BulkCampaign extends Model
         'failed_count',
         'status',
         'media_path',
+        'scheduled_at',
         'delay_min',
         'delay_max',
+    ];
+
+    protected $casts = [
+        'scheduled_at' => 'datetime',
     ];
 
     public function user()
