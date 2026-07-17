@@ -22,6 +22,9 @@ RUN docker-php-ext-install \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copy custom PHP settings
+COPY local.ini /usr/local/etc/php/conf.d/local.ini
+
 WORKDIR /var/www
 
 CMD ["php-fpm"]
