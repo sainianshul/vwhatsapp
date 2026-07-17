@@ -71,8 +71,17 @@ class BulkCampaignController extends Controller
         $mediaPath = null;
         $mediaFilename = null;
         if ($request->hasFile('media_file')) {
-            $mediaPath = $request->file('media_file')->store('campaigns/media', 'local');
-            $mediaFilename = $request->file('media_file')->getClientOriginalName();
+            $file = $request->file('media_file');
+            $originalName = $file->getClientOriginalName();
+            
+            // Remove any extremely weird characters for filesystem safety, but keep Hindi/Arabic/etc.
+            // A simple regex to just remove path separators and null bytes.
+            $safeName = str_replace(['/', '\\', "\0"], '_', $originalName);
+            
+            // Store in a unique folder to prevent collisions
+            $uniqueFolder = 'campaigns/media/' . uniqid();
+            $mediaPath = $file->storeAs($uniqueFolder, $safeName, 'local');
+            $mediaFilename = $safeName;
         }
 
         // Determine if scheduled or immediate
