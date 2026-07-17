@@ -1,10 +1,12 @@
+<?php $__env->startSection('title', 'Media Library'); ?>
+
 <?php $__env->startSection('content'); ?>
 
     <?php if (isset($component)) { $__componentOriginale19f62b34dfe0bfdf95075badcb45bc2 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginale19f62b34dfe0bfdf95075badcb45bc2 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.breadcrumb','data' => ['items' => [
-        ['label' => 'WhatsApp Accounts', 'url' => route('whatsapp_accounts.index')],
-        ['label' => 'Connected Accounts'],
+        ['label' => 'Media Library', 'url' => route('admin.media_library.index')],
+        ['label' => 'Media Groups'],
     ]]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('breadcrumb'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -13,8 +15,8 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['items' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([
-        ['label' => 'WhatsApp Accounts', 'url' => route('whatsapp_accounts.index')],
-        ['label' => 'Connected Accounts'],
+        ['label' => 'Media Library', 'url' => route('admin.media_library.index')],
+        ['label' => 'Media Groups'],
     ])]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -28,60 +30,42 @@
 <?php endif; ?>
 
     <div class="card shadow-sm">
-
         
         <div class="card-header border-0 pt-5 pb-3">
             <div class="d-flex align-items-center justify-content-between w-100 flex-wrap gap-3">
-
                 
                 <div class="d-flex align-items-center position-relative">
                     <i class="ki-duotone ki-magnifier fs-5 text-gray-900 position-absolute ms-4 z-index-3">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
-                    <input
-                        type="text"
-                        id="dt-search"
-                        class="form-control form-control-transparent border border-gray-800 text-gray-900 w-250px ps-11 pe-4 fs-7 fw-semibold shadow-sm"
-                        placeholder="Search accounts..."
-                    />
+                    <input type="text" id="dt-search" class="form-control form-control-transparent border border-gray-800 text-gray-900 w-250px ps-11 pe-4 fs-7 fw-semibold shadow-sm" placeholder="Search groups..." />
                 </div>
 
                 
                 <div class="d-flex align-items-center gap-2">
-
-                    
                     <button type="button" class="btn btn-icon btn-light btn-active-light-primary border border-gray-300 w-35px h-35px" id="refresh-table-btn" data-bs-toggle="tooltip" title="Refresh">
                         <i class="ki-outline ki-arrows-circle fs-3"></i>
                     </button>
-
-                    
-                    <a href="<?php echo e(route('whatsapp_accounts.create')); ?>" class="btn btn-sm btn-primary fw-semibold btn-flex btn-center">
-                        <i class="ki-duotone ki-plus-square fs-5 me-1">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                            <span class="path3"></span>
-                        </i>
-                        Add Account
-                    </a>
-
+                    <button type="button" class="btn btn-sm btn-primary fw-semibold btn-flex btn-center" data-bs-toggle="modal" data-bs-target="#create_group_modal">
+                        <i class="ki-outline ki-folder-plus fs-4 me-1"></i> New Media Group
+                    </button>
                 </div>
             </div>
         </div>
 
         
         <div class="card-body py-4">
+            <?php echo $__env->make('layouts.partials._alerts', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-            <div id="accounts-table-wrapper" class="table-responsive">
-                <table id="accounts-table" class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-3 w-100">
+            <div id="groups-table-wrapper" class="table-responsive">
+                <table id="groups-table" class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-3 w-100">
                     <thead>
                         <tr class="text-start text-gray-900 fw-medium fs-7 text-uppercase gs-0 border-bottom border-gray-200 border-1">
                             <th class="w-50px">S.No</th>
-                            <th class="w-60px">Profile</th>
-                            <th class="min-w-150px">Name</th>
-                            <th class="min-w-150px">Phone Number</th>
-                            <th class="min-w-100px">Status</th>
-                            <th class="min-w-150px">Connected At</th>
+                            <th class="min-w-200px">Group Name</th>
+                            <th class="min-w-100px">Total Assets</th>
+                            <th class="min-w-150px">Created At</th>
                             <th class="text-end min-w-150px pe-3">Actions</th>
                         </tr>
                     </thead>
@@ -89,17 +73,70 @@
                 </table>
             </div>
 
-            <?php echo $__env->make('layouts.partials._table-skeleton', [
-                'id' => 'accounts-skeleton'
-            ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+            <?php echo $__env->make('layouts.partials._table-skeleton', ['id' => 'groups-skeleton'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             <?php echo $__env->make('layouts.partials._table-empty', [
-                'id' => 'accounts-empty',
-                'title' => 'No accounts found',
-                'subtitle' => 'You haven\'t linked any WhatsApp numbers yet.',
-                'actionUrl' => route('whatsapp_accounts.create'),
-                'actionText' => 'Link Account'
+                'id' => 'groups-empty',
+                'title' => 'No media groups found',
+                'subtitle' => 'Create a media group to start organizing your files.',
+                'actionUrl' => '#',
+                'actionText' => 'Create Group',
+                'actionAttrs' => 'data-bs-toggle="modal" data-bs-target="#create_group_modal"'
             ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        </div>
+    </div>
 
+    <!-- Create Group Modal -->
+    <div class="modal fade" id="create_group_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-650px">
+            <div class="modal-content">
+                <form action="<?php echo e(route('admin.media_library.groups.store')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <div class="modal-header">
+                        <h2 class="fw-bold">Create Media Group</h2>
+                        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
+                            <i class="ki-outline ki-cross fs-1"></i>
+                        </div>
+                    </div>
+                    <div class="modal-body py-10 px-lg-17">
+                        <div class="fv-row mb-7">
+                            <label class="required form-label">Group Name</label>
+                            <input type="text" class="form-control" name="name" placeholder="e.g. Haryana Elections 2026" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer flex-center">
+                        <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Group</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Group Modal -->
+    <div class="modal fade" id="edit_group_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-650px">
+            <div class="modal-content">
+                <form id="editGroupForm" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
+                    <div class="modal-header">
+                        <h2 class="fw-bold">Edit Media Group</h2>
+                        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
+                            <i class="ki-outline ki-cross fs-1"></i>
+                        </div>
+                    </div>
+                    <div class="modal-body py-10 px-lg-17">
+                        <div class="fv-row mb-7">
+                            <label class="required form-label">Group Name</label>
+                            <input type="text" id="editGroupName" class="form-control" name="name" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer flex-center">
+                        <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Group</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -113,27 +150,20 @@
     <?php echo $__env->make('layouts.partials._datatable-cdn-js', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <script>
+        let table;
         $(function () {
-            let table = $('#accounts-table').DataTable({
+            table = $('#groups-table').DataTable({
                 serverSide: true,
                 processing: false,
                 ajax: {
-                    url: '<?php echo e(route('whatsapp_accounts.index')); ?>',
+                    url: '<?php echo e(route('admin.media_library.index')); ?>',
                 },
                 columns: [
                     { data: null, name: 'id', render: function (data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; }, orderable: false, searchable: false },
-                    { data: 'avatar', name: 'avatar', orderable: false, searchable: false },
-                    { data: 'name', name: 'name' },
-                    { data: 'phone_number', name: 'phone_number' },
-                    { data: 'status', name: 'status' },
+                    { data: 'name', name: 'name', render: function(data) { return '<span class="text-gray-800 fw-bold"><i class="ki-outline ki-folder text-primary fs-5 me-2"></i> ' + data + '</span>'; } },
+                    { data: 'assets_count', name: 'assets_count', orderable: false, searchable: false },
                     { data: 'created_at', name: 'created_at' },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        orderable: false,
-                        searchable: false,
-                        className: 'text-end pe-3'
-                    },
+                    { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-end pe-3' },
                 ],
                 order: [[3, 'desc']],
                 pageLength: 15,
@@ -147,8 +177,8 @@
                     emptyTable: ' ',
                     zeroRecords: ' ',
                     loadingRecords: ' ',
-                    info: 'Showing _START_–_END_ of _TOTAL_ accounts',
-                    infoEmpty: 'No accounts to show',
+                    info: 'Showing _START_–_END_ of _TOTAL_ groups',
+                    infoEmpty: 'No groups to show',
                     infoFiltered: '(filtered from _MAX_)',
                     lengthMenu: 'Show _MENU_',
                     paginate: {
@@ -157,18 +187,18 @@
                     },
                 },
                 initComplete: function () {
-                    $('#accounts-skeleton').fadeOut(200, function () {
+                    $('#groups-skeleton').fadeOut(200, function () {
                         $(this).remove();
                     });
                 },
                 drawCallback: function () {
                     let total = this.api().page.info().recordsDisplay;
                     if (total === 0) {
-                        $('#accounts-table-wrapper').addClass('d-none');
-                        $('#accounts-empty').removeClass('d-none');
+                        $('#groups-table-wrapper').addClass('d-none');
+                        $('#groups-empty').removeClass('d-none');
                     } else {
-                        $('#accounts-empty').addClass('d-none');
-                        $('#accounts-table-wrapper').removeClass('d-none');
+                        $('#groups-empty').addClass('d-none');
+                        $('#groups-table-wrapper').removeClass('d-none');
                     }
                     $('[data-bs-toggle="tooltip"]').tooltip({ trigger: 'hover' });
                 }
@@ -199,8 +229,8 @@
             $(document).on('click', '.btn-delete', function () {
                 let url = $(this).data('url');
                 Swal.fire({
-                    title: 'Delete Account?',
-                    text: 'This action cannot be undone.',
+                    title: 'Delete Group?',
+                    text: 'All media assets inside will be permanently deleted.',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, Delete',
@@ -218,16 +248,22 @@
                     })
                     .done(function (res) {
                         table.ajax.reload(null, false);
-                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'Account deleted successfully' });
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'Group deleted successfully' });
                     })
                     .fail(function (xhr) {
                         Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 3000, icon: 'error', title: xhr.responseJSON?.message || 'Something went wrong.' });
                     });
                 });
             });
-
         });
+
+        function editGroup(id, name) {
+            $('#editGroupName').val(name);
+            $('#editGroupForm').attr('action', `/media-library/groups/${id}`);
+            var modal = new bootstrap.Modal(document.getElementById('edit_group_modal'));
+            modal.show();
+        }
     </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/resources/views/admin/whatsapp_accounts/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/resources/views/admin/media_library/index.blade.php ENDPATH**/ ?>

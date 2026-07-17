@@ -16,7 +16,44 @@ class WhatsAppAccountController extends Controller
 
     public function index(WhatsAppAccountDataTable $dataTable)
     {
+        // Auto-sync: check real session status from Node for all "connected" accounts
+        $this->syncSessionStatuses();
+
         return $dataTable->render('admin.whatsapp_accounts.index');
+    }
+
+    /**
+     * Sync DB status with actual Node.js session status.
+     * Fast — single HTTP call to /api/health, no per-session calls.
+     */
+    private function syncSessionStatuses()
+    {
+        try {
+            $response = Http::timeout(3)->get("{$this->nodeUrl}/api/health");
+            if (!$response->successful()) return;
+
+            $data = $response->json();
+            $nodeSessions = collect($data['sessions'] ?? [])
+                ->keyBy('id'); // Map session_id => { id, status }
+
+            // Get all "connected" accounts from DB
+            $connectedAccounts = WhatsAppAccount::where('user_id', auth()->id())
+                ->where('status', 'connected')
+                ->get();
+
+            foreach ($connectedAccounts as $account) {
+                $nodeStatus = $nodeSessions->get($account->session_id);
+
+                // If Node doesn't know about this session, or it's disconnected/errored — update DB
+                if (!$nodeStatus || !in_array($nodeStatus['status'], ['connected', 'syncing_data', 'initializing', 'authenticating', 'qr_ready'])) {
+                    $account->update(['status' => 'disconnected']);
+                    Log::info("syncSessionStatuses: Marked account {$account->session_id} as disconnected (Node status: " . ($nodeStatus['status'] ?? 'not_found') . ")");
+                }
+            }
+        } catch (\Exception $e) {
+            // Node is offline — don't change anything, don't crash
+            Log::warning("syncSessionStatuses: Node unreachable — " . $e->getMessage());
+        }
     }
 
     public function create()

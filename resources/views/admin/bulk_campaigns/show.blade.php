@@ -312,7 +312,7 @@
                     Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: res.message || 'Message queued for resending' });
                 })
                 .fail(function (xhr) {
-                    toastr.error(xhr.responseJSON?.message || 'Something went wrong.');
+                    Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 3000, icon: 'error', title: xhr.responseJSON?.message || 'Something went wrong.' });
                 });
             });
 

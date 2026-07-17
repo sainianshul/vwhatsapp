@@ -20,7 +20,8 @@ class BulkCampaignController extends Controller
     public function create()
     {
         $accounts = WhatsAppAccount::where('user_id', auth()->id())->where('status', 'connected')->get();
-        return view('admin.bulk_campaigns.create', compact('accounts'));
+        $mediaGroups = \App\Models\MediaGroup::where('user_id', auth()->id())->get();
+        return view('admin.bulk_campaigns.create', compact('accounts', 'mediaGroups'));
     }
 
     public function store(Request $request)
@@ -30,7 +31,9 @@ class BulkCampaignController extends Controller
             'whatsapp_account_id' => 'required|exists:whats_app_accounts,id',
             'message_template' => 'required|string',
             'csv_file' => 'required|file|mimes:csv,txt|max:10240', // 10MB
+            'media_type' => 'required|in:none,single,dynamic',
             'media_file' => 'nullable|file|max:16384|mimes:jpg,jpeg,png,gif,mp4,mp3,ogg,pdf,doc,docx,xls,xlsx,zip', // 16MB
+            'media_group_id' => 'nullable|exists:media_groups,id',
             'scheduled_at' => 'nullable|date|after:now',
             'delay_min' => 'required|integer|min:1',
             'delay_max' => 'required|integer|gt:delay_min',
@@ -70,7 +73,9 @@ class BulkCampaignController extends Controller
         // Store media file (optional)
         $mediaPath = null;
         $mediaFilename = null;
-        if ($request->hasFile('media_file')) {
+        $mediaGroupId = null;
+
+        if ($request->media_type === 'single' && $request->hasFile('media_file')) {
             $file = $request->file('media_file');
             $originalName = $file->getClientOriginalName();
             
@@ -82,6 +87,8 @@ class BulkCampaignController extends Controller
             $uniqueFolder = 'campaigns/media/' . uniqid();
             $mediaPath = $file->storeAs($uniqueFolder, $safeName, 'local');
             $mediaFilename = $safeName;
+        } elseif ($request->media_type === 'dynamic' && $request->filled('media_group_id')) {
+            $mediaGroupId = $request->media_group_id;
         }
 
         // Determine if scheduled or immediate
@@ -97,6 +104,7 @@ class BulkCampaignController extends Controller
             'csv_file_path' => $path,
             'media_path' => $mediaPath,
             'media_filename' => $mediaFilename,
+            'media_group_id' => $mediaGroupId,
             'total_contacts' => $totalContacts,
             'status' => $isScheduled ? 'scheduled' : 'pending',
             'scheduled_at' => $scheduledAt,
@@ -244,5 +252,36 @@ class BulkCampaignController extends Controller
         $bulkCampaign->delete();
 
         return redirect()->route('admin.bulk_campaigns.index')->with('success', 'Campaign deleted successfully.');
+    }
+
+    public function pause(BulkCampaign $bulkCampaign)
+    {
+        if ($bulkCampaign->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($bulkCampaign->status !== 'running') {
+            return response()->json(['message' => 'Only running campaigns can be paused.'], 400);
+        }
+
+        $bulkCampaign->update(['status' => 'paused']);
+
+        return response()->json(['message' => 'Campaign paused successfully.']);
+    }
+
+    public function resume(BulkCampaign $bulkCampaign)
+    {
+        if ($bulkCampaign->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($bulkCampaign->status !== 'paused') {
+            return response()->json(['message' => 'Only paused campaigns can be resumed.'], 400);
+        }
+
+        // ProcessBulkCampaign will automatically set status to 'running'
+        ProcessBulkCampaign::dispatch($bulkCampaign);
+
+        return response()->json(['message' => 'Campaign resumed successfully.']);
     }
 }

@@ -40,8 +40,8 @@
                             </div>
                         </div>
                         <div class="card-body pt-0">
-                            <label class="required form-label text-gray-900 fw-semibold">From</label>
-                            <select name="whatsapp_account_id" class="form-select text-gray-900 border border-gray-300 bg-transparent <?php $__errorArgs = ['whatsapp_account_id'];
+                            <label class="required form-label">From</label>
+                            <select name="whatsapp_account_id" class="form-select <?php $__errorArgs = ['whatsapp_account_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -66,7 +66,6 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            <div class="text-gray-600 fs-7 mt-2">Choose the active WhatsApp account to send the message from.</div>
                         </div>
                     </div>
                     <!--end::Sender Account-->
@@ -91,20 +90,19 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                             
                             <!--begin::Input group-->
                             <div class="mb-7">
-                                <label class="required form-label fw-semibold">Receiver Numbers</label>
+                                <label class="required form-label">Receiver Numbers</label>
                                 <input class="form-control" value="<?php echo e(old('receiver_numbers')); ?>" name="receiver_numbers" id="receiver_numbers" placeholder="Enter up to 10 numbers (e.g. 919876543210)" required/>
-                                <div class="text-muted fs-7 mt-2">Type a number and press Enter, Comma, or Space. You can also paste multiple numbers separated by commas. Max 10 numbers allowed. For more, use Bulk Campaigns.</div>
                             </div>
                             <!--end::Input group-->
 
                             <!--begin::Input group-->
                             <div class="mb-7">
-                                <label class="required form-label text-gray-900 fw-semibold">Message Text</label>
-                                <textarea name="message_text" class="form-control text-gray-900 bg-transparent <?php $__errorArgs = ['message_text'];
+                                <label class="required form-label">Message Text</label>
+                                <textarea name="message_text" class="form-control <?php $__errorArgs = ['message_text'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid border-danger <?php else: ?> border border-gray-300 <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid border-danger <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" rows="5" placeholder="Type your message here..." required><?php echo e(old('message_text')); ?></textarea>
@@ -123,9 +121,15 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
                             <!--begin::Input group-->
                             <div class="mb-7">
-                                <label class="form-label text-gray-900 fw-semibold">Attach Media (Optional)</label>
+                                <label class="form-label">Attach Media (Optional)</label>
                                 <input type="file" name="media_file" id="mediaFile" class="form-control" accept="image/*,video/mp4,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" />
-                                <div class="text-muted fs-7 mt-2">Attach an image, video, audio, or document (Max 16MB).</div>
+                            </div>
+                            <!--end::Input group-->
+
+                            <!--begin::Input group-->
+                            <div class="mb-7">
+                                <label class="form-label">Schedule At (Optional)</label>
+                                <input type="datetime-local" name="scheduled_at" id="scheduledAt" class="form-control" />
                             </div>
                             <!--end::Input group-->
 
@@ -202,6 +206,18 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                         btn.prop('disabled', false).html(originalText);
                     }
                 });
+            });
+
+            // Schedule At: Dynamic button text
+            $('#scheduledAt').on('change', function() {
+                let btn = $('#btn-send-msg');
+                if ($(this).val()) {
+                    btn.html('<i class="ki-outline ki-calendar fs-4 me-1"></i> Schedule Message');
+                    btn.removeClass('btn-primary').addClass('btn-warning text-dark');
+                } else {
+                    btn.html('<i class="ki-outline ki-send fs-4 me-1"></i> Send Message');
+                    btn.removeClass('btn-warning text-dark').addClass('btn-primary');
+                }
             });
         });
     </script>

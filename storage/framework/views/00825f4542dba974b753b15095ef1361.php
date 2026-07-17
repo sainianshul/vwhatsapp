@@ -39,7 +39,7 @@
                         </span>
                     </div>
                     <div class="d-flex flex-column">
-                        <span class="fs-2hx fw-bold text-gray-900 lh-1 mb-1"><?php echo e($bulkCampaign->total_contacts); ?></span>
+                        <span id="stats-total-contacts" class="fs-2hx fw-bold text-gray-900 lh-1 mb-1"><?php echo e($bulkCampaign->total_contacts); ?></span>
                         <span class="text-primary fw-semibold fs-6">Total Contacts</span>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                         </span>
                     </div>
                     <div class="d-flex flex-column">
-                        <span class="fs-2hx fw-bold text-gray-900 lh-1 mb-1"><?php echo e($bulkCampaign->sent_count); ?></span>
+                        <span id="stats-sent-count" class="fs-2hx fw-bold text-gray-900 lh-1 mb-1"><?php echo e($bulkCampaign->sent_count); ?></span>
                         <span class="text-success fw-semibold fs-6">Sent Successfully</span>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                         </span>
                     </div>
                     <div class="d-flex flex-column">
-                        <span class="fs-2hx fw-bold text-gray-900 lh-1 mb-1"><?php echo e($bulkCampaign->failed_count); ?></span>
+                        <span id="stats-failed-count" class="fs-2hx fw-bold text-gray-900 lh-1 mb-1"><?php echo e($bulkCampaign->failed_count); ?></span>
                         <span class="text-danger fw-semibold fs-6">Failed</span>
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                         </span>
                     </div>
                     <div class="d-flex flex-column">
-                        <span class="fs-1 fw-bold text-gray-900 lh-1 mb-1"><?php echo e(ucfirst($bulkCampaign->status)); ?></span>
+                        <span id="stats-status" class="fs-1 fw-bold text-gray-900 lh-1 mb-1"><?php echo e(ucfirst($bulkCampaign->status)); ?></span>
                         <span class="text-<?php echo e($statusColor); ?> fw-semibold fs-6">Campaign Status</span>
                     </div>
                 </div>
@@ -354,6 +354,37 @@
                     toastr.error(xhr.responseJSON?.message || 'Something went wrong.');
                 });
             });
+
+            // --- Campaign Polling Logic ---
+            let currentStatus = '<?php echo e($bulkCampaign->status); ?>';
+            let activeStatuses = ['running', 'pending', 'scheduled', 'processing'];
+            
+            if (activeStatuses.includes(currentStatus)) {
+                let pollInterval = setInterval(function() {
+                    $.ajax({
+                        url: '<?php echo e(route('admin.bulk_campaigns.stats', $bulkCampaign->id)); ?>',
+                        method: 'GET',
+                        success: function(res) {
+                            // Update DOM Elements
+                            $('#stats-total-contacts').text(res.total_contacts);
+                            $('#stats-sent-count').text(res.sent_count);
+                            $('#stats-failed-count').text(res.failed_count);
+                            $('#stats-status').text(res.status_label);
+                            
+                            // Refresh table silently
+                            table.ajax.reload(null, false);
+
+                            // Stop polling if completed or failed
+                            if (['completed', 'failed'].includes(res.status)) {
+                                clearInterval(pollInterval);
+                                // Refresh one last time just to be sure
+                                setTimeout(() => table.ajax.reload(null, false), 1000);
+                            }
+                        }
+                    });
+                }, 10000); // 10 seconds
+            }
+            // ------------------------------
         });
     </script>
 <?php $__env->stopPush(); ?>

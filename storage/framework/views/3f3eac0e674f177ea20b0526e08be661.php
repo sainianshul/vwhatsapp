@@ -192,6 +192,96 @@
                 });
             });
 
+            $(document).on('click', '.btn-delete', function () {
+                let url = $(this).data('url');
+                Swal.fire({
+                    title: 'Delete Campaign?',
+                    text: 'This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Delete',
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-light ms-2'
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+
+                    $.post(url, {
+                        _method: 'DELETE',
+                        _token: '<?php echo e(csrf_token()); ?>'
+                    })
+                    .done(function (res) {
+                        table.ajax.reload(null, false);
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'Campaign deleted successfully' });
+                    })
+                    .fail(function (xhr) {
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 3000, icon: 'error', title: xhr.responseJSON?.message || 'Something went wrong.' });
+                    });
+                });
+            });
+
+            // Pause Campaign
+            $(document).on('click', '.btn-pause', function () {
+                let url = $(this).data('url');
+                Swal.fire({
+                    title: 'Pause Campaign?',
+                    text: 'The campaign will stop sending messages after the current one completes.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Pause',
+                    customClass: {
+                        confirmButton: 'btn btn-warning',
+                        cancelButton: 'btn btn-light ms-2'
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+
+                    $.post(url, {
+                        _token: '<?php echo e(csrf_token()); ?>'
+                    })
+                    .done(function (res) {
+                        table.ajax.reload(null, false);
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'Campaign paused' });
+                    })
+                    .fail(function (xhr) {
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 3000, icon: 'error', title: xhr.responseJSON?.message || 'Something went wrong.' });
+                    });
+                });
+            });
+
+            // Resume Campaign
+            $(document).on('click', '.btn-resume', function () {
+                let url = $(this).data('url');
+                Swal.fire({
+                    title: 'Resume Campaign?',
+                    text: 'The campaign will resume sending messages from where it left off.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Resume',
+                    customClass: {
+                        confirmButton: 'btn btn-success',
+                        cancelButton: 'btn btn-light ms-2'
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+
+                    $.post(url, {
+                        _token: '<?php echo e(csrf_token()); ?>'
+                    })
+                    .done(function (res) {
+                        table.ajax.reload(null, false);
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'Campaign resumed' });
+                    })
+                    .fail(function (xhr) {
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 3000, icon: 'error', title: xhr.responseJSON?.message || 'Something went wrong.' });
+                    });
+                });
+            });
+
         });
     </script>
 <?php $__env->stopPush(); ?>

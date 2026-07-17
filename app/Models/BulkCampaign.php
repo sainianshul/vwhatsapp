@@ -22,6 +22,7 @@ class BulkCampaign extends Model
         'status',
         'media_path',
         'media_filename',
+        'media_group_id',
         'scheduled_at',
         'delay_min',
         'delay_max',
@@ -39,6 +40,11 @@ class BulkCampaign extends Model
     public function whatsappAccount()
     {
         return $this->belongsTo(WhatsAppAccount::class);
+    }
+
+    public function mediaGroup()
+    {
+        return $this->belongsTo(MediaGroup::class, 'media_group_id');
     }
 
     public function messages()

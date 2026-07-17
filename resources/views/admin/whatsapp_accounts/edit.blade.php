@@ -22,8 +22,7 @@
             <div class="card-body pt-5">
                 <div class="mb-5">
                     <label class="form-label fw-bold">Custom Name (Alias)</label>
-                    <input type="text" name="name" class="form-control form-control-solid" placeholder="e.g. Sales Team, Support Line" value="{{ old('name', $account->name) }}">
-                    <div class="text-muted fs-7 mt-2">Set a custom name to easily identify this account in dropdowns and reports.</div>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Sales Team, Support Line" value="{{ old('name', $account->name) }}">
                     @error('name')
                         <div class="text-danger mt-1 fs-7">{{ $message }}</div>
                     @enderror
@@ -31,7 +30,7 @@
                 
                 <div class="mb-5">
                     <label class="form-label fw-bold">WhatsApp Name (Push Name)</label>
-                    <input type="text" class="form-control form-control-solid text-gray-500" value="{{ $account->push_name ?? 'N/A' }}" readonly>
+                    <input type="text" class="form-control bg-light text-gray-500" value="{{ $account->push_name ?? 'N/A' }}" readonly>
                 </div>
 
                 <div class="mb-5">

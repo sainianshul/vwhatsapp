@@ -147,6 +147,17 @@
 
                 <!--begin::Menu Item-->
                 <div class="menu-item">
+                    <a class="menu-link <?php echo e(request()->routeIs('admin.media_library.*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.media_library.index')); ?>">
+                        <span class="menu-icon">
+                            <i class="ki-outline ki-folder fs-2"></i>
+                        </span>
+                        <span class="menu-title">Media Library</span>
+                    </a>
+                </div>
+                <!--end::Menu Item-->
+
+                <!--begin::Menu Item-->
+                <div class="menu-item">
                     <a class="menu-link <?php echo e(request()->routeIs('whatsapp_messages.index') ? 'active' : ''); ?>" href="<?php echo e(route('whatsapp_messages.index')); ?>">
                         <span class="menu-icon">
                             <i class="ki-outline ki-document fs-2"></i>

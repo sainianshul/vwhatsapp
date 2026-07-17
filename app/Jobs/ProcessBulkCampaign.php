@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\BulkCampaign;
 use App\Models\WhatsAppMessage;
+use App\Models\MediaAsset;
 use App\Services\WhatsAppService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,11 +13,13 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class ProcessBulkCampaign implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $queue = 'bulk';
     public $campaign;
     public $timeout = 0; // Prevent timeout for long campaigns
 
@@ -59,17 +62,17 @@ class ProcessBulkCampaign implements ShouldQueue
                 throw new \Exception("CSV file must contain a 'phone' column.");
             }
 
-            // Resolve media path once (shared between all messages in this campaign)
-            $mediaAbsolutePath = null;
-            $mediaType = null;
-            if ($this->campaign->media_path) {
-                $mediaAbsolutePath = Storage::path($this->campaign->media_path);
-                if (!file_exists($mediaAbsolutePath)) {
-                    Log::warning("Campaign {$this->campaign->id}: Media file not found at {$mediaAbsolutePath}, sending text only.");
-                    $mediaAbsolutePath = null;
+            // Resolve Single Media path once (if media_type == single)
+            $singleMediaAbsolutePath = null;
+            $singleMediaType = null;
+            if ($this->campaign->media_path && is_null($this->campaign->media_group_id)) {
+                $singleMediaAbsolutePath = Storage::path($this->campaign->media_path);
+                if (!file_exists($singleMediaAbsolutePath)) {
+                    Log::warning("Campaign {$this->campaign->id}: Media file not found at {$singleMediaAbsolutePath}, sending text only.");
+                    $singleMediaAbsolutePath = null;
                 } else {
                     // Determine media type from file extension
-                    $ext = strtolower(pathinfo($mediaAbsolutePath, PATHINFO_EXTENSION));
+                    $ext = strtolower(pathinfo($singleMediaAbsolutePath, PATHINFO_EXTENSION));
                     $typeMap = [
                         'jpg' => 'image', 'jpeg' => 'image', 'png' => 'image', 'gif' => 'image',
                         'mp4' => 'video',
@@ -77,11 +80,22 @@ class ProcessBulkCampaign implements ShouldQueue
                         'pdf' => 'document', 'doc' => 'document', 'docx' => 'document',
                         'xls' => 'document', 'xlsx' => 'document', 'zip' => 'document',
                     ];
-                    $mediaType = $typeMap[$ext] ?? 'document';
+                    $singleMediaType = $typeMap[$ext] ?? 'document';
                 }
+            }
+            
+            // Check if Dynamic Media Group is configured
+            $hasDynamicMedia = !is_null($this->campaign->media_group_id);
+            $mediaCodeIndex = array_search('media_code', $headers);
+            
+            if ($hasDynamicMedia && $mediaCodeIndex === false) {
+                throw new \Exception("Campaign uses Dynamic Media, but CSV is missing 'media_code' column.");
             }
 
             while (($row = fgetcsv($file)) !== false) {
+                // Reconnect DB in case MySQL dropped idle connection during sleep
+                DB::reconnect();
+
                 // Check if campaign was paused, failed, or soft-deleted
                 $this->campaign->refresh();
                 if ($this->campaign->trashed() || $this->campaign->status !== 'running') {
@@ -91,6 +105,17 @@ class ProcessBulkCampaign implements ShouldQueue
                 $phone = $row[$phoneIndex] ?? null;
                 if (!$phone) {
                     continue; // Skip empty rows
+                }
+
+                // Sanitize phone number (strip spaces, dashes, plus signs)
+                $phone = preg_replace('/[^0-9]/', '', $phone);
+
+                // Check if this contact has already been processed for this campaign
+                $alreadyProcessed = WhatsAppMessage::where('bulk_campaign_id', $this->campaign->id)
+                                                    ->where('receiver_number', $phone)
+                                                    ->exists();
+                if ($alreadyProcessed) {
+                    continue; // Skip, already processed in previous run
                 }
 
                 // Process Variables in Message Template
@@ -108,8 +133,44 @@ class ProcessBulkCampaign implements ShouldQueue
                     Log::warning("Campaign {$this->campaign->id}: Message for {$phone} has unreplaced variables: {$messageText}");
                 }
 
-                // Sanitize phone number (strip spaces, dashes, plus signs)
-                $phone = preg_replace('/[^0-9]/', '', $phone);
+                // Resolve dynamic media for this row (if any)
+                $currentRowMediaAbsolutePath = $singleMediaAbsolutePath;
+                $currentRowMediaType = $singleMediaType;
+                $currentRowMediaFilename = $this->campaign->media_filename;
+                $currentRowMediaPath = $this->campaign->media_path;
+
+                if ($hasDynamicMedia && $mediaCodeIndex !== false) {
+                    $mediaCode = trim($row[$mediaCodeIndex] ?? '');
+                    if (!empty($mediaCode)) {
+                        $asset = MediaAsset::where('media_group_id', $this->campaign->media_group_id)
+                                           ->where('asset_code', $mediaCode)
+                                           ->where('status', 'active')
+                                           ->first();
+                        
+                        if ($asset) {
+                            $currentRowMediaPath = $asset->file_path;
+                            $currentRowMediaAbsolutePath = Storage::disk('public')->path($asset->file_path);
+                            $currentRowMediaFilename = $asset->file_name;
+                            
+                            $ext = strtolower(pathinfo($currentRowMediaAbsolutePath, PATHINFO_EXTENSION));
+                            $typeMap = [
+                                'jpg' => 'image', 'jpeg' => 'image', 'png' => 'image', 'gif' => 'image',
+                                'mp4' => 'video',
+                                'mp3' => 'audio', 'ogg' => 'audio',
+                                'pdf' => 'document', 'doc' => 'document', 'docx' => 'document',
+                                'xls' => 'document', 'xlsx' => 'document', 'zip' => 'document',
+                            ];
+                            $currentRowMediaType = $typeMap[$ext] ?? 'document';
+
+                            if (!file_exists($currentRowMediaAbsolutePath)) {
+                                Log::warning("Campaign {$this->campaign->id}: Dynamic Media file not found for code {$mediaCode}, sending text only.");
+                                $currentRowMediaAbsolutePath = null;
+                            }
+                        } else {
+                            Log::warning("Campaign {$this->campaign->id}: Dynamic Media code '{$mediaCode}' not found or inactive.");
+                        }
+                    }
+                }
 
                 // Create Message Record
                 $messageRecord = WhatsAppMessage::create([
@@ -117,8 +178,8 @@ class ProcessBulkCampaign implements ShouldQueue
                     'whatsapp_account_id' => $this->campaign->whatsapp_account_id,
                     'receiver_number' => $phone,
                     'message_text' => $messageText,
-                    'media_path' => $this->campaign->media_path,
-                    'media_type' => $mediaType,
+                    'media_path' => $currentRowMediaPath,
+                    'media_type' => $currentRowMediaType,
                     'status' => 'pending',
                     'bulk_campaign_id' => $this->campaign->id,
                     'is_bulk' => true,
@@ -132,13 +193,13 @@ class ProcessBulkCampaign implements ShouldQueue
                 $retryDelay = 15; // seconds
 
                 for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-                    if ($mediaAbsolutePath) {
+                    if ($currentRowMediaAbsolutePath) {
                         $response = $whatsappService->sendMediaMessage(
                             $sessionId,
                             $phone,
-                            $mediaAbsolutePath,
+                            $currentRowMediaAbsolutePath,
                             $messageText,
-                            $this->campaign->media_filename ?? basename($mediaAbsolutePath)
+                            $currentRowMediaFilename ?? basename($currentRowMediaAbsolutePath)
                         );
                     } else {
                         $response = $whatsappService->sendMessage(
@@ -177,6 +238,7 @@ class ProcessBulkCampaign implements ShouldQueue
                     sleep($retryDelay);
 
                     // Re-check if campaign was cancelled during the wait
+                    DB::reconnect();
                     $this->campaign->refresh();
                     if ($this->campaign->trashed() || $this->campaign->status !== 'running') {
                         break 2; // Exit both the retry loop and the main CSV loop

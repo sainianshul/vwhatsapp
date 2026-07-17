@@ -26,6 +26,22 @@ app.get('/', (req, res) => {
     res.json({ status: 'success', message: 'WhatsApp Microservice is running' });
 });
 
+// Detailed health check for monitoring
+app.get('/api/health', (req, res) => {
+    const mem = process.memoryUsage();
+    res.json({
+        status: 'healthy',
+        uptime_seconds: Math.floor(process.uptime()),
+        active_sessions: SessionManager.sessions.size,
+        memory: {
+            rss_mb: Math.round(mem.rss / 1024 / 1024),
+            heap_used_mb: Math.round(mem.heapUsed / 1024 / 1024),
+            heap_total_mb: Math.round(mem.heapTotal / 1024 / 1024),
+        },
+        sessions: Array.from(SessionManager.status.entries()).map(([id, st]) => ({ id, status: st }))
+    });
+});
+
 /**
  * Start a new WhatsApp session (Triggers QR generation if not logged in)
  */

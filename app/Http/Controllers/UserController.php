@@ -111,12 +111,9 @@ class UserController extends Controller
                 ->addColumn('actions', function (User $user) {
                     return '
                         <div class="d-flex gap-1 justify-content-end">
-                            <form action="'.route('users.restore', $user->id).'" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm(\'Are you sure you want to restore this user?\');">
-                                '.csrf_field().'
-                                <button type="submit" class="btn btn-sm btn-icon btn-light-success border border-success w-30px h-30px" title="Restore">
-                                    <i class="ki-outline ki-arrows-circle fs-5"></i>
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-icon btn-light-success btn-restore" data-url="'.route('users.restore', $user->id).'" data-bs-toggle="tooltip" title="Restore User">
+                                <i class="ki-outline ki-arrows-loop fs-4"></i>
+                            </button>
                         </div>
                     ';
                 })

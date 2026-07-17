@@ -15,6 +15,7 @@ class ProcessQuickMessage implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $queue = 'quick';
     public $messageId;
 
     /**

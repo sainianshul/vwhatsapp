@@ -59,7 +59,7 @@ unset($__defined_vars); ?>
     <div class="card-body pt-4 pb-8">
         
         
-        <form action="#" method="POST" class="mb-8 add-comment-form">
+        <form action="<?php echo e(route('comments.store')); ?>" method="POST" class="mb-8 add-comment-form">
             <?php echo csrf_field(); ?>
             <input type="hidden" name="commentable_type" value="<?php echo e($type); ?>">
             <input type="hidden" name="commentable_id" value="<?php echo e($modelId); ?>">
@@ -105,7 +105,7 @@ unset($__defined_vars); ?>
                             </div>
                             
                             
-                            <form action="#" method="POST" class="delete-comment-form">
+                            <form action="<?php echo e(route('comments.destroy', $comment->id)); ?>" method="POST" class="delete-comment-form">
                                 <?php echo csrf_field(); ?>
                                 <?php echo method_field('DELETE'); ?>
                                 <button type="button" class="btn btn-icon btn-sm btn-active-light-danger h-25px w-25px rounded btn-delete-comment" title="Delete note">

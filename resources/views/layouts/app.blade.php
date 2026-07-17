@@ -62,6 +62,37 @@
             background: #ffffff !important;
         }
 
+        /* Clean, sharp form inputs (Google-like) */
+        html[data-bs-theme="light"] .form-control,
+        html[data-bs-theme="light"] .form-control-solid,
+        html[data-bs-theme="light"] .form-select,
+        html[data-bs-theme="light"] .form-select-solid {
+            background-color: #ffffff !important;
+            border: 1px solid #dadce0 !important; /* Google gray border */
+            color: #202124 !important;
+            border-radius: 4px !important; /* Sharper corners */
+            transition: border-color 0.2s ease;
+        }
+        
+        html[data-bs-theme="light"] .form-control:focus,
+        html[data-bs-theme="light"] .form-control-solid:focus,
+        html[data-bs-theme="light"] .form-select:focus,
+        html[data-bs-theme="light"] .form-select-solid:focus {
+            border-color: var(--bs-primary) !important;
+            border-width: 2px !important;
+            padding-left: calc(0.75rem - 1px) !important; /* Adjust padding for 2px border so it doesn't jump */
+            padding-right: calc(0.75rem - 1px) !important;
+            box-shadow: none !important;
+        }
+
+        /* Sharp, thin, dark labels */
+        html[data-bs-theme="light"] .form-label,
+        html[data-bs-theme="light"] label {
+            color: #202124 !important;
+            font-weight: 500 !important; /* Sharper than 600/700 */
+            font-size: 0.9rem !important;
+        }
+
         /* Increase sidebar text font size and make it black/darker */
         #kt_app_sidebar .menu-item .menu-title {
             font-size: 1.05rem !important;

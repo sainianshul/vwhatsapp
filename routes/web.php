@@ -25,10 +25,24 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bulk-campaigns/sample-csv', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'downloadSampleCsv'])->name('admin.bulk_campaigns.sample_csv');
     Route::get('/bulk-campaigns/{bulkCampaign}/export', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'exportCsv'])->name('admin.bulk_campaigns.export');
     Route::get('/bulk-campaigns/{bulkCampaign}/stats', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'stats'])->name('admin.bulk_campaigns.stats');
+    Route::post('/bulk-campaigns/{bulkCampaign}/pause', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'pause'])->name('admin.bulk_campaigns.pause');
+    Route::post('/bulk-campaigns/{bulkCampaign}/resume', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'resume'])->name('admin.bulk_campaigns.resume');
     Route::resource('bulk-campaigns', \App\Http\Controllers\Admin\BulkCampaignController::class, [
         'names' => 'admin.bulk_campaigns',
         'only' => ['index', 'create', 'store', 'show', 'destroy']
     ]);
+
+    // Media Library Routes
+    Route::get('/media-library', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'index'])->name('admin.media_library.index');
+    Route::post('/media-library/groups', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'storeGroup'])->name('admin.media_library.groups.store');
+    Route::put('/media-library/groups/{group}', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'updateGroup'])->name('admin.media_library.groups.update');
+    Route::delete('/media-library/groups/{group}', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'destroyGroup'])->name('admin.media_library.groups.destroy');
+    Route::get('/media-library/groups/{group}', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'show'])->name('admin.media_library.groups.show');
+    
+    Route::post('/media-library/groups/{group}/assets', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'storeAsset'])->name('admin.media_library.assets.store');
+    Route::put('/media-library/assets/{asset}', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'updateAsset'])->name('admin.media_library.assets.update');
+    Route::patch('/media-library/assets/{asset}/status', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'updateAssetStatus'])->name('admin.media_library.assets.status');
+    Route::delete('/media-library/assets/{asset}', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'destroyAsset'])->name('admin.media_library.assets.destroy');
 
     // Developer Settings
     Route::get('/developer-settings', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'index'])->name('admin.developer_settings.index');

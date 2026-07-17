@@ -107,8 +107,7 @@
                 <div class="modal-body py-8 px-8">
                     <div class="mb-5">
                         <label class="required fs-6 fw-semibold text-dark mb-2">Token Name / Integration</label>
-                        <input type="text" class="form-control form-control-solid border" placeholder="e.g. Sales CRM Server" name="token_name" required autocomplete="off" />
-                        <div class="text-muted fs-7 mt-2">Give this token a recognizable name so you can identify it later.</div>
+                        <input type="text" class="form-control" placeholder="e.g. Sales CRM Server" name="token_name" required autocomplete="off" />
                     </div>
                 </div>
                 <div class="modal-footer border-top p-4">
@@ -225,7 +224,7 @@
                         Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'Key revoked successfully' });
                     })
                     .fail(function (xhr) {
-                        toastr.error(xhr.responseJSON?.message || 'Something went wrong.');
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 3000, icon: 'error', title: xhr.responseJSON?.message || 'Something went wrong.' });
                     });
                 });
             });

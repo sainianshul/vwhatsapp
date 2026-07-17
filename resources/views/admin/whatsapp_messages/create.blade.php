@@ -42,8 +42,8 @@
                             </div>
                         </div>
                         <div class="card-body pt-0">
-                            <label class="required form-label text-gray-900 fw-semibold">From</label>
-                            <select name="whatsapp_account_id" class="form-select text-gray-900 border border-gray-300 bg-transparent @error('whatsapp_account_id') is-invalid @enderror" data-control="select2" data-hide-search="true" required>
+                            <label class="required form-label">From</label>
+                            <select name="whatsapp_account_id" class="form-select @error('whatsapp_account_id') is-invalid @enderror" data-control="select2" data-hide-search="true" required>
                                 <option value="">Select Account</option>
                                 @foreach ($activeAccounts as $account)
                                     <option value="{{ $account->id }}" {{ old('whatsapp_account_id') == $account->id ? 'selected' : '' }}>
@@ -54,7 +54,6 @@
                             @error('whatsapp_account_id')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
-                            <div class="text-gray-600 fs-7 mt-2">Choose the active WhatsApp account to send the message from.</div>
                         </div>
                     </div>
                     <!--end::Sender Account-->
@@ -79,16 +78,15 @@
                             
                             <!--begin::Input group-->
                             <div class="mb-7">
-                                <label class="required form-label fw-semibold">Receiver Numbers</label>
+                                <label class="required form-label">Receiver Numbers</label>
                                 <input class="form-control" value="{{ old('receiver_numbers') }}" name="receiver_numbers" id="receiver_numbers" placeholder="Enter up to 10 numbers (e.g. 919876543210)" required/>
-                                <div class="text-muted fs-7 mt-2">Type a number and press Enter, Comma, or Space. You can also paste multiple numbers separated by commas. Max 10 numbers allowed. For more, use Bulk Campaigns.</div>
                             </div>
                             <!--end::Input group-->
 
                             <!--begin::Input group-->
                             <div class="mb-7">
-                                <label class="required form-label text-gray-900 fw-semibold">Message Text</label>
-                                <textarea name="message_text" class="form-control text-gray-900 bg-transparent @error('message_text') is-invalid border-danger @else border border-gray-300 @enderror" rows="5" placeholder="Type your message here..." required>{{ old('message_text') }}</textarea>
+                                <label class="required form-label">Message Text</label>
+                                <textarea name="message_text" class="form-control @error('message_text') is-invalid border-danger @enderror" rows="5" placeholder="Type your message here..." required>{{ old('message_text') }}</textarea>
                                 @error('message_text')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -97,17 +95,15 @@
 
                             <!--begin::Input group-->
                             <div class="mb-7">
-                                <label class="form-label text-gray-900 fw-semibold">Attach Media (Optional)</label>
+                                <label class="form-label">Attach Media (Optional)</label>
                                 <input type="file" name="media_file" id="mediaFile" class="form-control" accept="image/*,video/mp4,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" />
-                                <div class="text-muted fs-7 mt-2">Attach an image, video, audio, or document (Max 16MB).</div>
                             </div>
                             <!--end::Input group-->
 
                             <!--begin::Input group-->
                             <div class="mb-7">
-                                <label class="form-label text-gray-900 fw-semibold">Schedule At (Optional)</label>
-                                <input type="datetime-local" name="scheduled_at" id="scheduledAt" class="form-control text-gray-900 bg-transparent border border-gray-300" />
-                                <div class="text-muted fs-7 mt-2">Leave empty to send immediately.</div>
+                                <label class="form-label">Schedule At (Optional)</label>
+                                <input type="datetime-local" name="scheduled_at" id="scheduledAt" class="form-control" />
                             </div>
                             <!--end::Input group-->
 

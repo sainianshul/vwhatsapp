@@ -102,7 +102,7 @@
                         @csrf
 
                         <div class="fv-row mb-5">
-                            <label class="form-label text-gray-500 text-uppercase fw-bold fs-9 mb-2 required">
+                            <label class="form-label text-gray-900 fw-medium fs-7 mb-2 required">
                                 Email Address
                             </label>
                             <div class="input-group border border-gray-300 rounded">
@@ -129,7 +129,7 @@
                         </div>
 
                         <div class="fv-row mb-5" data-kt-password-meter="true">
-                            <label class="form-label text-gray-500 text-uppercase fw-bold fs-9 mb-2 required">
+                            <label class="form-label text-gray-900 fw-medium fs-7 mb-2 required">
                                 Password
                             </label>
                             <div class="input-group border border-gray-300 rounded" id="kt_password_input">

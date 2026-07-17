@@ -24,17 +24,41 @@ services:
       - mysql
       - redis
 
-  queue:
+  queue-quick:
 
     build:
       context: .
       dockerfile: Dockerfile
 
-    container_name: vwhatsapp_queue
+    container_name: vwhatsapp_queue_quick
 
     restart: unless-stopped
 
-    command: php artisan queue:work --sleep=3 --tries=3
+    command: php artisan queue:work --queue=quick --sleep=3 --tries=3
+
+    working_dir: /var/www
+
+    environment:
+      - TZ=Asia/Kolkata
+
+    volumes:
+      - ./:/var/www
+
+    depends_on:
+      - mysql
+      - redis
+
+  queue-bulk:
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: vwhatsapp_queue_bulk
+
+    restart: unless-stopped
+
+    command: php artisan queue:work --queue=bulk --sleep=3 --tries=1 --timeout=0
 
     working_dir: /var/www
 

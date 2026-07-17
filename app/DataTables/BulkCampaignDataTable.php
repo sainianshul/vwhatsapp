@@ -34,6 +34,8 @@ class BulkCampaignDataTable extends DataTable
                     $scheduledTime = $campaign->scheduled_at ? $campaign->scheduled_at->format('d M, h:i A') : '';
                     return '<span class="badge badge-light-info border border-info fw-bold">Scheduled</span>'
                          . ($scheduledTime ? '<div class="text-muted fs-8 mt-1">' . $scheduledTime . '</div>' : '');
+                } elseif ($campaign->status === 'paused') {
+                    return '<span class="badge badge-light-warning border border-warning fw-bold">Paused</span>';
                 }
                 return '<span class="badge badge-light-warning border border-warning fw-bold">'.ucfirst($campaign->status ?: 'Pending').'</span>';
             })
@@ -41,18 +43,30 @@ class BulkCampaignDataTable extends DataTable
                 return '<div class="fw-semibold">'.$campaign->created_at->format('d M Y, H:i').'</div>';
             })
             ->addColumn('actions', function (BulkCampaign $campaign) {
+                $pauseResumeBtn = '';
+                if ($campaign->status === 'running') {
+                    $pauseResumeBtn = '
+                        <button type="button" class="btn btn-sm btn-icon btn-light-warning border border-warning w-30px h-30px ms-1 btn-pause" data-url="'.route('admin.bulk_campaigns.pause', $campaign->id).'" data-bs-toggle="tooltip" title="Pause Campaign">
+                            <i class="ki-outline ki-pause fs-5 text-warning"></i>
+                        </button>
+                    ';
+                } elseif ($campaign->status === 'paused') {
+                    $pauseResumeBtn = '
+                        <button type="button" class="btn btn-sm btn-icon btn-light-success border border-success w-30px h-30px ms-1 btn-resume" data-url="'.route('admin.bulk_campaigns.resume', $campaign->id).'" data-bs-toggle="tooltip" title="Resume Campaign">
+                            <i class="ki-outline ki-play fs-5 text-success"></i>
+                        </button>
+                    ';
+                }
+
                 return '
                     <div class="d-flex gap-1 justify-content-end">
                         <a href="'.route('admin.bulk_campaigns.show', $campaign->id).'" class="btn btn-sm btn-icon btn-light-primary border border-primary w-30px h-30px" title="View Report">
                             <i class="ki-outline ki-eye fs-5"></i>
                         </a>
-                        <form action="'.route('admin.bulk_campaigns.destroy', $campaign->id).'" method="POST" class="d-inline" onsubmit="return confirm(\'Are you sure you want to delete this campaign?\');">
-                            '.csrf_field().'
-                            '.method_field('DELETE').'
-                            <button type="submit" class="btn btn-sm btn-icon btn-light-danger border border-danger w-30px h-30px" title="Delete Campaign">
-                                <i class="ki-outline ki-trash fs-5"></i>
-                            </button>
-                        </form>
+                        ' . $pauseResumeBtn . '
+                        <button type="button" class="btn btn-sm btn-icon btn-light-danger border border-danger w-30px h-30px ms-1 btn-delete" data-url="'.route('admin.bulk_campaigns.destroy', $campaign->id).'" data-bs-toggle="tooltip" title="Delete Campaign">
+                            <i class="ki-outline ki-trash fs-5"></i>
+                        </button>
                     </div>
                 ';
             })

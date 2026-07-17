@@ -67,24 +67,52 @@
                                 <div class="mb-7">
                                     <div class="d-flex justify-content-between mb-2">
                                         <label class="required form-label fw-semibold mb-0">Upload Contacts CSV</label>
-                                        <a href="{{ route('admin.bulk_campaigns.sample_csv') }}" class="text-primary fs-7 fw-bold"><i class="fa fa-download me-1"></i> Download Sample CSV</a>
+                                        <a href="{{ route('admin.bulk_campaigns.sample_csv') }}" class="text-primary fs-7 fw-bold"><i class="fa fa-download me-1"></i> Sample CSV</a>
                                     </div>
                                     <input type="file" name="csv_file" id="csvFile" class="form-control" accept=".csv" required />
-                                    <div class="text-muted fs-7 mt-2">CSV must contain a <strong>phone</strong> column. Other columns can be used as variables like <code>@{{name}}</code>.</div>
                                 </div>
 
                                 <div class="mb-7">
-                                    <div class="d-flex justify-content-between mb-2">
+                                    <div class="d-flex justify-content-between mb-3">
                                         <label class="form-label fw-semibold mb-0">Attach Media (Optional)</label>
                                     </div>
-                                    <input type="file" name="media_file" id="mediaFile" class="form-control" accept="image/*,video/mp4,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" />
-                                    <div class="text-muted fs-7 mt-2">Attach an image, video, audio, or document (Max 16MB). This media will be sent to all contacts.</div>
-                                    <!-- Media Preview -->
-                                    <div id="mediaPreview" class="mt-3 d-none">
-                                        <img id="mediaPreviewImg" src="" class="rounded border d-none" style="max-height: 120px; max-width: 200px;" />
-                                        <div id="mediaPreviewFile" class="d-none badge badge-light-primary border border-primary px-3 py-2 fs-7">
-                                            <i class="ki-outline ki-file fs-5 me-1"></i> <span id="mediaPreviewFileName"></span>
+                                    
+                                    <!-- Radio Buttons for Media Selection -->
+                                    <div class="d-flex flex-wrap gap-6 mb-4">
+                                        <div class="form-check form-check-custom">
+                                            <input class="form-check-input" type="radio" name="media_type" value="none" id="media_type_none" checked />
+                                            <label class="form-check-label text-gray-800" for="media_type_none">No Media</label>
                                         </div>
+                                        <div class="form-check form-check-custom">
+                                            <input class="form-check-input" type="radio" name="media_type" value="single" id="media_type_single" />
+                                            <label class="form-check-label text-gray-800" for="media_type_single">Single File</label>
+                                        </div>
+                                        <div class="form-check form-check-custom">
+                                            <input class="form-check-input" type="radio" name="media_type" value="dynamic" id="media_type_dynamic" />
+                                            <label class="form-check-label text-gray-800" for="media_type_dynamic">Dynamic Group</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Single File Upload Area -->
+                                    <div id="singleFileArea" class="d-none">
+                                        <input type="file" name="media_file" id="mediaFile" class="form-control" accept="image/*,video/mp4,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" />
+                                        <!-- Media Preview -->
+                                        <div id="mediaPreview" class="mt-3 d-none">
+                                            <img id="mediaPreviewImg" src="" class="rounded border d-none" style="max-height: 120px; max-width: 200px;" />
+                                            <div id="mediaPreviewFile" class="d-none badge badge-light-primary border border-primary px-3 py-2 fs-7">
+                                                <i class="ki-outline ki-file fs-5 me-1"></i> <span id="mediaPreviewFileName"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dynamic Media Group Area -->
+                                    <div id="dynamicMediaArea" class="d-none">
+                                        <select name="media_group_id" class="form-select" data-control="select2" data-placeholder="Select a Media Group">
+                                            <option value=""></option>
+                                            @foreach($mediaGroups as $group)
+                                                <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 
@@ -121,7 +149,6 @@
                                 <div class="mb-7">
                                     <label class="form-label fw-semibold fs-7">Schedule At (Optional)</label>
                                     <input type="datetime-local" name="scheduled_at" id="scheduledAt" class="form-control form-control-sm" value="{{ old('scheduled_at') }}" />
-                                    <div class="text-muted fs-8 mt-2">Leave empty to send immediately.</div>
                                 </div>
 
                                 <!-- Anti Ban Settings -->
@@ -136,7 +163,6 @@
                                         <input type="number" name="delay_max" class="form-control form-control-sm" value="60" min="2" required />
                                     </div>
                                 </div>
-                                <div class="text-muted fs-8 mb-7">Random gap between sending messages to mimic human behavior.</div>
 
                                 <!-- Live Preview -->
                                 <h4 class="fs-5 fw-bold text-gray-800 mb-4">Live Preview</h4>
@@ -366,6 +392,26 @@
 
         // Init char counter
         updateCharCount();
+        // ─── Radio Button Logic ───
+        const mediaRadios = document.querySelectorAll('input[name="media_type"]');
+        const singleFileArea = document.getElementById('singleFileArea');
+        const dynamicMediaArea = document.getElementById('dynamicMediaArea');
+        
+        mediaRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'none') {
+                    singleFileArea.classList.add('d-none');
+                    dynamicMediaArea.classList.add('d-none');
+                } else if (this.value === 'single') {
+                    singleFileArea.classList.remove('d-none');
+                    dynamicMediaArea.classList.add('d-none');
+                } else if (this.value === 'dynamic') {
+                    singleFileArea.classList.add('d-none');
+                    dynamicMediaArea.classList.remove('d-none');
+                }
+            });
+        });
+
     });
 </script>
 @endpush

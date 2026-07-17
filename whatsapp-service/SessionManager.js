@@ -255,12 +255,22 @@ class SessionManager {
         let cleanTo = to.replace(/[^0-9]/g, '');
         const formattedTo = `${cleanTo}@c.us`;
 
-        const numberDetails = await client.getNumberId(formattedTo);
-        if (!numberDetails) {
-            throw new Error(`The number ${cleanTo} is not registered on WhatsApp.`);
-        }
+        try {
+            const numberDetails = await client.getNumberId(formattedTo);
+            if (!numberDetails) {
+                throw new Error(`The number ${cleanTo} is not registered on WhatsApp.`);
+            }
 
-        return await client.sendMessage(numberDetails._serialized, message);
+            return await client.sendMessage(numberDetails._serialized, message);
+        } catch (err) {
+            // Detect Puppeteer-level crashes (session is dead, not a user error)
+            if (this._isPuppeteerCrash(err)) {
+                console.error(`[SessionManager] Puppeteer crash in sendMessage for ${sessionId}: ${err.message}`);
+                this._cleanupSession(sessionId);
+                throw new Error('Session crashed. Please reconnect the account from the dashboard.');
+            }
+            throw err; // Re-throw user-level errors (invalid number, etc.)
+        }
     }
 
     /**
@@ -306,25 +316,49 @@ class SessionManager {
         let cleanTo = to.replace(/[^0-9]/g, '');
         const formattedTo = `${cleanTo}@c.us`;
 
-        const numberDetails = await client.getNumberId(formattedTo);
-        if (!numberDetails) {
-            throw new Error(`The number ${cleanTo} is not registered on WhatsApp.`);
+        try {
+            const numberDetails = await client.getNumberId(formattedTo);
+            if (!numberDetails) {
+                throw new Error(`The number ${cleanTo} is not registered on WhatsApp.`);
+            }
+
+            const { MessageMedia } = require('whatsapp-web.js');
+            const media = MessageMedia.fromFilePath(mediaPath);
+
+            // Override filename if provided (useful for documents)
+            if (filename) {
+                media.filename = filename;
+            }
+
+            const options = {};
+            if (caption) {
+                options.caption = caption;
+            }
+
+            return await client.sendMessage(numberDetails._serialized, media, options);
+        } catch (err) {
+            // Detect Puppeteer-level crashes (session is dead, not a user error)
+            if (this._isPuppeteerCrash(err)) {
+                console.error(`[SessionManager] Puppeteer crash in sendMediaMessage for ${sessionId}: ${err.message}`);
+                this._cleanupSession(sessionId);
+                throw new Error('Session crashed. Please reconnect the account from the dashboard.');
+            }
+            throw err; // Re-throw user-level errors
         }
+    }
 
-        const { MessageMedia } = require('whatsapp-web.js');
-        const media = MessageMedia.fromFilePath(mediaPath);
-
-        // Override filename if provided (useful for documents)
-        if (filename) {
-            media.filename = filename;
-        }
-
-        const options = {};
-        if (caption) {
-            options.caption = caption;
-        }
-
-        return await client.sendMessage(numberDetails._serialized, media, options);
+    /**
+     * Check if an error is a Puppeteer/browser-level crash (not a user error).
+     */
+    _isPuppeteerCrash(err) {
+        const msg = (err.message || '').toLowerCase();
+        return msg.includes('protocol error') ||
+               msg.includes('target closed') ||
+               msg.includes('execution context was destroyed') ||
+               msg.includes('session closed') ||
+               msg.includes('browser has disconnected') ||
+               msg.includes('page crashed') ||
+               msg.includes('navigation failed');
     }
 
     /**
