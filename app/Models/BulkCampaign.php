@@ -17,6 +17,7 @@ class BulkCampaign extends Model
         'failed_count',
         'status',
         'media_path',
+        'media_filename',
         'scheduled_at',
         'delay_min',
         'delay_max',

@@ -69,8 +69,10 @@ class BulkCampaignController extends Controller
 
         // Store media file (optional)
         $mediaPath = null;
+        $mediaFilename = null;
         if ($request->hasFile('media_file')) {
             $mediaPath = $request->file('media_file')->store('campaigns/media', 'local');
+            $mediaFilename = $request->file('media_file')->getClientOriginalName();
         }
 
         // Determine if scheduled or immediate
@@ -85,6 +87,7 @@ class BulkCampaignController extends Controller
             'message_template' => $request->message_template,
             'csv_file_path' => $path,
             'media_path' => $mediaPath,
+            'media_filename' => $mediaFilename,
             'total_contacts' => $totalContacts,
             'status' => $isScheduled ? 'scheduled' : 'pending',
             'scheduled_at' => $scheduledAt,

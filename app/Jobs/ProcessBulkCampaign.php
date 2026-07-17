@@ -133,7 +133,7 @@ class ProcessBulkCampaign implements ShouldQueue
                         $phone,
                         $mediaAbsolutePath,
                         $messageText,
-                        basename($mediaAbsolutePath)
+                        $this->campaign->media_filename ?? basename($mediaAbsolutePath)
                     );
                 } else {
                     $response = $whatsappService->sendMessage(
