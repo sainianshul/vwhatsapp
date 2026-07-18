@@ -19,7 +19,6 @@ class ProcessBulkCampaign implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $queue = 'bulk';
     public $campaign;
     public $timeout = 0; // Prevent timeout for long campaigns
 
@@ -29,6 +28,7 @@ class ProcessBulkCampaign implements ShouldQueue
     public function __construct(BulkCampaign $campaign)
     {
         $this->campaign = $campaign;
+        $this->onQueue('bulk');
     }
 
     /**
