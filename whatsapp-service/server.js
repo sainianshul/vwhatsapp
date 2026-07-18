@@ -38,7 +38,11 @@ app.get('/api/health', (req, res) => {
             heap_used_mb: Math.round(mem.heapUsed / 1024 / 1024),
             heap_total_mb: Math.round(mem.heapTotal / 1024 / 1024),
         },
-        sessions: Array.from(SessionManager.status.entries()).map(([id, st]) => ({ id, status: st }))
+        sessions: Array.from(SessionManager.status.entries()).map(([id, st]) => ({
+            id,
+            status: st,
+            reconnect: SessionManager.getReconnectInfo(id)
+        }))
     });
 });
 
@@ -62,13 +66,28 @@ app.post('/api/sessions/start', (req, res) => {
 });
 
 /**
+ * Reconnect a disconnected session (uses saved auth data, no QR needed)
+ */
+app.post('/api/sessions/:id/reconnect', (req, res) => {
+    const sessionId = req.params.id;
+
+    try {
+        SessionManager.reconnectSession(sessionId);
+        res.json({ status: 'success', data: { sessionId, state: 'reconnecting' } });
+    } catch (error) {
+        res.status(400).json({ status: 'error', message: error.message });
+    }
+});
+
+/**
  * Get the status of a session
  */
 app.get('/api/sessions/:id/status', (req, res) => {
     const sessionId = req.params.id;
     const status = SessionManager.getStatus(sessionId);
+    const reconnectInfo = SessionManager.getReconnectInfo(sessionId);
     
-    res.json({ status: 'success', data: { sessionId, state: status } });
+    res.json({ status: 'success', data: { sessionId, state: status, reconnect: reconnectInfo } });
 });
 
 /**
@@ -105,12 +124,18 @@ app.get('/api/sessions/:id/qr', async (req, res) => {
         }
     }
 
-    // 3. Transitional states — tell frontend to wait
+    // 3. Reconnecting — tell frontend to wait
+    if (status === 'reconnecting') {
+        const reconnectInfo = SessionManager.getReconnectInfo(sessionId);
+        return res.json({ status: 'syncing', data: { state: 'reconnecting', reconnect: reconnectInfo } });
+    }
+
+    // 4. Transitional states — tell frontend to wait
     if (['initializing', 'authenticating', 'qr_ready', 'syncing_data'].includes(status)) {
         return res.json({ status: 'syncing', data: { state: status } });
     }
 
-    // 4. Error or disconnected or not_found — ONLY now return error
+    // 5. Error or disconnected or not_found — ONLY now return error
     return res.json({ status: 'failed', data: { state: status } });
 });
 
@@ -172,34 +197,51 @@ app.post('/api/sessions/:id/logout', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`WhatsApp Microservice running on port ${PORT}`);
     
-    // Auto-boot saved sessions
+    // ─── Clean stale cache on startup ───
+    const cacheDir = path.join(__dirname, '.wwebjs_cache');
+    if (fs.existsSync(cacheDir)) {
+        try {
+            fs.rmSync(cacheDir, { recursive: true, force: true });
+            console.log('[Startup] Cleaned stale .wwebjs_cache directory');
+        } catch (err) {
+            console.error('[Startup] Failed to clean cache:', err.message);
+        }
+    }
+
+    // ─── Auto-boot saved sessions ───
     const authDir = path.join(__dirname, '.wwebjs_auth');
     if (fs.existsSync(authDir)) {
         const folders = fs.readdirSync(authDir);
-        for (const folder of folders) {
-            if (folder.startsWith('session-')) {
-                const sessionId = folder.replace('session-', '');
-                
-                // Remove Chromium locks to prevent "profile in use" errors after crash/restart
-                const sessionPath = path.join(authDir, folder);
-                const lockFiles = ['SingletonLock', 'SingletonCookie'];
-                lockFiles.forEach(file => {
-                    const filePath = path.join(sessionPath, file);
-                    try {
-                        // Use lstatSync to detect broken symlinks, existsSync fails for broken symlinks
-                        const stat = fs.lstatSync(filePath);
-                        if (stat) {
-                            fs.unlinkSync(filePath);
-                            console.log(`[AutoBoot] Removed stale lock ${file} for session ${sessionId}`);
-                        }
-                    } catch (err) {
-                        // File doesn't exist, ignore
-                    }
-                });
+        const sessionFolders = folders.filter(f => f.startsWith('session-'));
 
-                console.log(`[AutoBoot] Found saved session: ${sessionId}, starting it up...`);
+        console.log(`[AutoBoot] Found ${sessionFolders.length} saved session(s)`);
+
+        // Stagger session boots by 5 seconds each to avoid overwhelming the server
+        sessionFolders.forEach((folder, index) => {
+            const sessionId = folder.replace('session-', '');
+            const sessionPath = path.join(authDir, folder);
+
+            // Remove Chromium locks to prevent "profile in use" errors after crash/restart
+            const lockFiles = ['SingletonLock', 'SingletonCookie', 'SingletonSocket'];
+            lockFiles.forEach(file => {
+                const filePath = path.join(sessionPath, file);
+                try {
+                    const stat = fs.lstatSync(filePath);
+                    if (stat) {
+                        fs.unlinkSync(filePath);
+                        console.log(`[AutoBoot] Removed stale lock ${file} for session ${sessionId}`);
+                    }
+                } catch (err) {
+                    // File doesn't exist, ignore
+                }
+            });
+
+            // Stagger boots: first immediately, then +5s, +10s, etc.
+            const delay = index * 5000;
+            setTimeout(() => {
+                console.log(`[AutoBoot] Starting session: ${sessionId}`);
                 SessionManager.startSession(sessionId, true); // isAutoBoot = true
-            }
-        }
+            }, delay);
+        });
     }
 });

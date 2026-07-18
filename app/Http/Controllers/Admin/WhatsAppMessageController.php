@@ -16,7 +16,7 @@ class WhatsAppMessageController extends Controller
 
     public function __construct()
     {
-        $this->nodeUrl = 'http://whatsapp-service:3000';
+        $this->nodeUrl = env('NODE_MICROSERVICE_URL', 'http://whatsapp-service:3000');
     }
 
     public function index(\App\DataTables\WhatsAppMessageDataTable $dataTable)

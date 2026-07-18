@@ -12,7 +12,12 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppAccountController extends Controller
 {
-    private $nodeUrl = 'http://whatsapp-service:3000'; // Docker internal URL
+    private $nodeUrl;
+
+    public function __construct()
+    {
+        $this->nodeUrl = env('NODE_MICROSERVICE_URL', 'http://whatsapp-service:3000');
+    }
 
     public function index(WhatsAppAccountDataTable $dataTable)
     {
@@ -29,12 +34,12 @@ class WhatsAppAccountController extends Controller
     private function syncSessionStatuses()
     {
         try {
-            $response = Http::timeout(3)->get("{$this->nodeUrl}/api/health");
+            $response = Http::timeout(5)->get("{$this->nodeUrl}/api/health");
             if (!$response->successful()) return;
 
             $data = $response->json();
             $nodeSessions = collect($data['sessions'] ?? [])
-                ->keyBy('id'); // Map session_id => { id, status }
+                ->keyBy('id');
 
             // Get all "connected" accounts from DB
             $connectedAccounts = WhatsAppAccount::where('user_id', auth()->id())
@@ -43,15 +48,21 @@ class WhatsAppAccountController extends Controller
 
             foreach ($connectedAccounts as $account) {
                 $nodeStatus = $nodeSessions->get($account->session_id);
+                $validStates = ['connected', 'syncing_data', 'initializing', 'authenticating', 'qr_ready', 'reconnecting'];
 
-                // If Node doesn't know about this session, or it's disconnected/errored — update DB
-                if (!$nodeStatus || !in_array($nodeStatus['status'], ['connected', 'syncing_data', 'initializing', 'authenticating', 'qr_ready'])) {
-                    $account->update(['status' => 'disconnected']);
-                    Log::info("syncSessionStatuses: Marked account {$account->session_id} as disconnected (Node status: " . ($nodeStatus['status'] ?? 'not_found') . ")");
+                if (!$nodeStatus || !in_array($nodeStatus['status'], $validStates)) {
+                    // Node doesn't have this session or it's dead — trigger reconnect
+                    try {
+                        Http::timeout(3)->post("{$this->nodeUrl}/api/sessions/{$account->session_id}/reconnect");
+                        $account->update(['status' => 'reconnecting']);
+                        Log::info("syncSessionStatuses: Triggered reconnect for {$account->session_id}");
+                    } catch (\Exception $reconnectErr) {
+                        $account->update(['status' => 'disconnected']);
+                        Log::info("syncSessionStatuses: Marked {$account->session_id} as disconnected (reconnect failed)");
+                    }
                 }
             }
         } catch (\Exception $e) {
-            // Node is offline — don't change anything, don't crash
             Log::warning("syncSessionStatuses: Node unreachable — " . $e->getMessage());
         }
     }
@@ -187,9 +198,85 @@ class WhatsAppAccountController extends Controller
             return response()->json(['status' => 'waiting']);
 
         } catch (\Exception $e) {
-            // Network error / timeout — DON'T tell frontend it's an error.
-            // Just say "waiting" so it retries on the next poll.
             Log::warning("qrStatus transient error for {$sessionId}: " . $e->getMessage());
+            return response()->json(['status' => 'waiting']);
+        }
+    }
+
+    /**
+     * Reconnect a disconnected session without re-scanning QR.
+     */
+    public function reconnect($id)
+    {
+        $account = WhatsAppAccount::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        try {
+            $response = Http::timeout(10)->post("{$this->nodeUrl}/api/sessions/{$account->session_id}/reconnect");
+            $data = $response->json();
+
+            if ($response->successful() && ($data['status'] ?? '') === 'success') {
+                $account->update(['status' => 'reconnecting']);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reconnection initiated. Please wait...'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $data['message'] ?? 'Failed to reconnect. Please try scanning QR again.'
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error("Reconnect failed for account {$id}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'WhatsApp service is offline. Please try again later.'
+            ], 503);
+        }
+    }
+
+    /**
+     * Check the reconnection status of a session (polled by AJAX).
+     */
+    public function reconnectStatus($id)
+    {
+        $account = WhatsAppAccount::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        try {
+            $response = Http::timeout(5)->get("{$this->nodeUrl}/api/sessions/{$account->session_id}/status");
+            $data = $response->json();
+            $nodeState = $data['data']['state'] ?? 'unknown';
+
+            // Update DB if connected
+            if ($nodeState === 'connected') {
+                // Fetch user info from QR endpoint
+                $qrResponse = Http::timeout(5)->get("{$this->nodeUrl}/api/sessions/{$account->session_id}/qr");
+                $qrData = $qrResponse->json();
+
+                $account->status = 'connected';
+                $account->phone_number = $qrData['data']['phone'] ?? $account->phone_number;
+                $account->push_name = $qrData['data']['name'] ?? $account->push_name;
+                $account->profile_pic_url = $qrData['data']['profile_pic_url'] ?? $account->profile_pic_url;
+                $account->save();
+
+                return response()->json(['status' => 'connected']);
+            }
+
+            if (in_array($nodeState, ['initializing', 'authenticating', 'syncing_data', 'reconnecting'])) {
+                return response()->json(['status' => 'reconnecting', 'state' => $nodeState]);
+            }
+
+            if ($nodeState === 'error' || $nodeState === 'auth_failed') {
+                $account->update(['status' => 'disconnected']);
+                return response()->json(['status' => 'failed', 'message' => 'Reconnection failed. Please scan QR again.']);
+            }
+
+            return response()->json(['status' => 'waiting']);
+        } catch (\Exception $e) {
             return response()->json(['status' => 'waiting']);
         }
     }

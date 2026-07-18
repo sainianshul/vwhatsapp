@@ -15,7 +15,8 @@ class WhatsAppService
     }
 
     /**
-     * Send a text message using the microservice
+     * Send a text message using the microservice.
+     * Includes automatic retry on transient failures.
      *
      * @param string $sessionId
      * @param string $receiverNumber
@@ -30,32 +31,12 @@ class WhatsAppService
             'text' => $messageText,
         ];
 
-        try {
-            // High timeout for safety
-            $response = Http::timeout(120)->post("{$this->nodeUrl}/api/messages/send", $payload);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                return [
-                    'success' => true,
-                    'message_id' => $data['data']['messageId'] ?? null,
-                    'error' => null
-                ];
-            } else {
-                return [
-                    'success' => false,
-                    'message_id' => null,
-                    'error' => $response->json('message') ?? 'Unknown error from microservice.'
-                ];
-            }
-        } catch (\Exception $e) {
-            Log::error("WhatsAppService sendMessage Error: " . $e->getMessage());
-            return [
-                'success' => false,
-                'message_id' => null,
-                'error' => $e->getMessage()
-            ];
-        }
+        return $this->sendWithRetry(
+            "{$this->nodeUrl}/api/messages/send",
+            $payload,
+            'sendMessage',
+            120
+        );
     }
 
     /**
@@ -82,31 +63,100 @@ class WhatsAppService
             $payload['filename'] = $filename;
         }
 
-        try {
-            // Higher timeout for media (files can be large)
-            $response = Http::timeout(180)->post("{$this->nodeUrl}/api/messages/send-media", $payload);
+        return $this->sendWithRetry(
+            "{$this->nodeUrl}/api/messages/send-media",
+            $payload,
+            'sendMediaMessage',
+            180
+        );
+    }
 
-            if ($response->successful()) {
-                $data = $response->json();
-                return [
-                    'success' => true,
-                    'message_id' => $data['data']['messageId'] ?? null,
-                    'error' => null
-                ];
-            } else {
+    /**
+     * Send a request with automatic retry on transient failures.
+     * Retries up to 2 times (3 attempts total) with a 3-second delay.
+     *
+     * @param string $url
+     * @param array $payload
+     * @param string $methodName for logging
+     * @param int $timeout seconds
+     * @return array
+     */
+    private function sendWithRetry(string $url, array $payload, string $methodName, int $timeout): array
+    {
+        $maxRetries = 2;
+        $retryDelay = 3; // seconds
+
+        for ($attempt = 0; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $response = Http::timeout($timeout)->post($url, $payload);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    return [
+                        'success' => true,
+                        'message_id' => $data['data']['messageId'] ?? null,
+                        'error' => null
+                    ];
+                }
+
+                $errorMsg = $response->json('message') ?? 'Unknown error from microservice.';
+
+                // Don't retry on user-level errors (invalid number, not registered, etc.)
+                if ($response->status() === 400) {
+                    return [
+                        'success' => false,
+                        'message_id' => null,
+                        'error' => $errorMsg
+                    ];
+                }
+
+                // On 500 (session crash, etc.), retry if we have attempts left
+                if ($attempt < $maxRetries) {
+                    Log::warning("WhatsAppService {$methodName}: Attempt {$attempt} failed ({$errorMsg}), retrying in {$retryDelay}s...");
+                    sleep($retryDelay);
+                    continue;
+                }
+
                 return [
                     'success' => false,
                     'message_id' => null,
-                    'error' => $response->json('message') ?? 'Unknown error from microservice.'
+                    'error' => $errorMsg
+                ];
+
+            } catch (\Exception $e) {
+                // Connection errors (timeout, refused, etc.) — retry
+                if ($attempt < $maxRetries && $this->isTransientError($e)) {
+                    Log::warning("WhatsAppService {$methodName}: Transient error on attempt {$attempt} ({$e->getMessage()}), retrying in {$retryDelay}s...");
+                    sleep($retryDelay);
+                    continue;
+                }
+
+                Log::error("WhatsAppService {$methodName} Error: " . $e->getMessage());
+                return [
+                    'success' => false,
+                    'message_id' => null,
+                    'error' => $e->getMessage()
                 ];
             }
-        } catch (\Exception $e) {
-            Log::error("WhatsAppService sendMediaMessage Error: " . $e->getMessage());
-            return [
-                'success' => false,
-                'message_id' => null,
-                'error' => $e->getMessage()
-            ];
         }
+
+        return [
+            'success' => false,
+            'message_id' => null,
+            'error' => 'Failed after all retry attempts.'
+        ];
+    }
+
+    /**
+     * Determine if an exception represents a transient (retryable) error.
+     */
+    private function isTransientError(\Exception $e): bool
+    {
+        $msg = strtolower($e->getMessage());
+        return str_contains($msg, 'connection refused') ||
+               str_contains($msg, 'timed out') ||
+               str_contains($msg, 'timeout') ||
+               str_contains($msg, 'could not resolve') ||
+               str_contains($msg, 'connection reset');
     }
 }

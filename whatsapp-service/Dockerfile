@@ -1,8 +1,10 @@
 FROM node:18-slim
 
 # Install dependencies required by Puppeteer/Chromium for whatsapp-web.js
+# Added dumb-init for proper signal handling (prevents zombie processes)
 RUN apt-get update && apt-get install -y \
     chromium \
+    dumb-init \
     fonts-ipafont-gothic \
     fonts-wqy-zenhei \
     fonts-thai-tlwg \
@@ -31,6 +33,10 @@ COPY . .
 
 # Expose port
 EXPOSE 3000
+
+# Use dumb-init as PID 1 to handle signals properly
+# This prevents zombie Chromium processes on container restart
+ENTRYPOINT ["dumb-init", "--"]
 
 # Start server
 CMD ["npm", "start"]
