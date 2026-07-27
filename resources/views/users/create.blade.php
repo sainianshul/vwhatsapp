@@ -89,7 +89,7 @@
                                 <label class="required form-label text-gray-900 fw-semibold">Phone Number</label>
                                 <div class="position-relative">
                                     <i class="ki-outline ki-phone fs-2 position-absolute top-50 translate-middle-y ms-4 text-gray-600"></i>
-                                    <input type="text" name="phone" class="form-control text-gray-900 bg-transparent ps-12 @error('phone') is-invalid border-danger @else border border-gray-300 @enderror"
+                                    <input type="text" name="phone" class="form-control text-gray-900 bg-transparent @error('phone') is-invalid border-danger @else border border-gray-300 @enderror" style="padding-left: 45px !important;"
                                         value="{{ old('phone') }}" placeholder="Enter phone number" required pattern="[0-9+]*" minlength="10" maxlength="15" oninput="this.value = this.value.replace(/[^0-9+]/g, '')" />
                                 </div>
                                 @error('phone')
@@ -104,7 +104,7 @@
                                 <label class="form-label text-gray-900 fw-semibold">Email Address</label>
                                 <div class="position-relative">
                                     <i class="ki-outline ki-sms fs-2 position-absolute top-50 translate-middle-y ms-4 text-gray-900"></i>
-                                    <input type="email" name="email" class="form-control text-gray-900 bg-transparent ps-12 @error('email') is-invalid border-danger @else border border-gray-300 @enderror"
+                                    <input type="email" name="email" class="form-control text-gray-900 bg-transparent @error('email') is-invalid border-danger @else border border-gray-300 @enderror" style="padding-left: 45px !important;"
                                         placeholder="Enter email address" value="{{ old('email') }}" />
                                 </div>
                                 @error('email')
@@ -114,13 +114,27 @@
                             </div>
                             <!--end::Input group-->
 
+                            <!--begin::Input group-->
+                            <div class="mb-7">
+                                <label class="required form-label text-gray-900 fw-semibold">Max WhatsApp Accounts</label>
+                                <div class="position-relative">
+                                    <input type="number" name="max_whatsapp_accounts" class="form-control text-gray-900 bg-transparent @error('max_whatsapp_accounts') is-invalid border-danger @else border border-gray-300 @enderror"
+                                        placeholder="Enter max accounts (default 3)" value="{{ old('max_whatsapp_accounts', 3) }}" min="1" required />
+                                </div>
+                                @error('max_whatsapp_accounts')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                                <div class="text-gray-600 fs-7 mt-2">Maximum number of WhatsApp accounts this user can connect.</div>
+                            </div>
+                            <!--end::Input group-->
+
                             <div class="row g-7 mb-7">
                                 <!--begin::Input group-->
                                 <div class="col-lg-6">
                                     <label class="required form-label text-gray-900 fw-semibold">Password</label>
                                     <div class="position-relative">
                                         <i class="ki-outline ki-lock-3 fs-2 position-absolute top-50 translate-middle-y ms-4 text-gray-900"></i>
-                                        <input type="password" name="password" class="form-control text-gray-900 bg-transparent ps-12 @error('password') is-invalid border-danger @else border border-gray-300 @enderror"
+                                        <input type="password" name="password" class="form-control text-gray-900 bg-transparent @error('password') is-invalid border-danger @else border border-gray-300 @enderror" style="padding-left: 45px !important;"
                                             placeholder="Enter password" required minlength="6" />
                                     </div>
                                     @error('password')
@@ -135,7 +149,7 @@
                                     <label class="required form-label text-gray-900 fw-semibold">Confirm Password</label>
                                     <div class="position-relative">
                                         <i class="ki-outline ki-lock-2 fs-2 position-absolute top-50 translate-middle-y ms-4 text-gray-900"></i>
-                                        <input type="password" name="password_confirmation" class="form-control text-gray-900 bg-transparent ps-12 border border-gray-300"
+                                        <input type="password" name="password_confirmation" class="form-control text-gray-900 bg-transparent border border-gray-300" style="padding-left: 45px !important;"
                                             placeholder="Confirm password" required minlength="6" />
                                     </div>
                                 </div>

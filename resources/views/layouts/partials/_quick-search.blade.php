@@ -5,41 +5,29 @@
             // Dashboard
             { name: 'Dashboard', route: '{{ route('dashboard') }}', icon: 'ki-outline ki-element-11', color: 'primary' },
 
-            // Requests
-            { name: 'All Requests', route: '#', icon: 'ki-outline ki-calendar-8', color: 'success' },
-            { name: 'Today\'s Requests', route: '#', icon: 'ki-outline ki-calendar-add', color: 'success' },
+            // Users
+            { name: 'All Users', route: '{{ route('users.index') }}', icon: 'ki-outline ki-people', color: 'primary' },
+            { name: 'Add User', route: '{{ route('users.create') }}', icon: 'ki-outline ki-user-square', color: 'success' },
 
-            // Bids
-            { name: 'All Bids', route: '#', icon: 'ki-outline ki-handcart', color: 'warning' },
-            { name: 'Today\'s Bids', route: '#', icon: 'ki-outline ki-abstract-26', color: 'warning' },
+            // WhatsApp Accounts
+            { name: 'All Accounts', route: '{{ route('whatsapp_accounts.index') }}', icon: 'ki-outline ki-whatsapp', color: 'success' },
+            { name: 'Trash Accounts', route: '{{ route('whatsapp_accounts.trash') }}', icon: 'ki-outline ki-trash', color: 'danger' },
 
+            // Messages
+            { name: 'Send Message', route: '{{ route('whatsapp_messages.create') }}', icon: 'ki-outline ki-send', color: 'primary' },
+            { name: 'Message Logs', route: '{{ route('whatsapp_messages.index') }}', icon: 'ki-outline ki-document', color: 'info' },
 
-            // Bookings
-            { name: 'All Bookings', route: '#', icon: 'ki-outline ki-calendar-tick', color: 'info' },
-            { name: 'Active Bookings', route: '#', icon: 'ki-outline ki-pulse', color: 'primary' },
-            { name: 'Cancelled Bookings', route: '#', icon: 'ki-outline ki-abstract-11', color: 'danger' },
-
-            // Patients
-            { name: 'All Patients', route: '#', icon: 'ki-outline ki-user', color: 'primary' },
-            { name: 'Blocked Patients', route: '#', icon: 'ki-outline ki-cross-circle', color: 'danger' },
-
-            // Nurses
-            { name: 'All Nurses', route: '#', icon: 'ki-outline ki-profile-user', color: 'success' },
-            { name: 'Pending Nurses', route: '#', icon: 'ki-outline ki-time', color: 'warning' },
-            { name: 'Approved Nurses', route: '#', icon: 'ki-outline ki-verify', color: 'success' },
-            { name: 'Rejected Nurses', route: '#', icon: 'ki-outline ki-cross-square', color: 'danger' },
-
-            // Services
-            { name: 'Care Types', route: '#', icon: 'ki-outline ki-heart', color: 'danger' },
+            // Campaigns & Media
+            { name: 'Bulk Campaigns', route: '{{ route('admin.bulk_campaigns.index') }}', icon: 'ki-outline ki-rocket', color: 'warning' },
+            { name: 'Media Library', route: '{{ route('admin.media_library.index') }}', icon: 'ki-outline ki-folder', color: 'info' },
 
             // Support
-            { name: 'Support Tickets', route: '#', icon: 'ki-outline ki-message-text-2', color: 'primary' },
-            { name: 'Support Categories', route: '#', icon: 'ki-outline ki-category', color: 'info' },
-            { name: 'FAQs', route: '#', icon: 'ki-outline ki-question', color: 'warning' },
+            { name: 'Help & Support', route: '{{ route('tickets.index') }}', icon: 'ki-outline ki-questionnaire-tablet', color: 'primary' },
+            { name: 'Create Ticket', route: '{{ route('tickets.create') }}', icon: 'ki-outline ki-plus-square', color: 'success' },
 
             // System
-            { name: 'Login History', route: '#', icon: 'ki-outline ki-entrance-left', color: 'secondary' },
-            { name: 'Error Logs', route: '#', icon: 'ki-outline ki-bug', color: 'danger' }
+            { name: 'Login History', route: '{{ route('login_history.index') }}', icon: 'ki-outline ki-security-user', color: 'secondary' },
+            { name: 'Developer Settings', route: '{{ route('admin.developer_settings.index') }}', icon: 'ki-outline ki-code', color: 'danger' }
         ];
 
         const input = document.querySelector('.search-input');

@@ -6,8 +6,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginHistoryController;
 
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    return view('welcome');
+})->name('home');
 
 Route::get('login', [AuthController::class, 'index'])->name('login');
 Route::post('custom-login', [AuthController::class, 'customLogin'])->name('login.custom');
@@ -44,8 +44,10 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/media-library/assets/{asset}/status', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'updateAssetStatus'])->name('admin.media_library.assets.status');
     Route::delete('/media-library/assets/{asset}', [\App\Http\Controllers\Admin\MediaLibraryController::class, 'destroyAsset'])->name('admin.media_library.assets.destroy');
 
-    // Developer Settings
-    Route::get('/developer-settings', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'index'])->name('admin.developer_settings.index');
+    // Admin Only Routes
+    Route::middleware(['admin'])->group(function () {
+        // Developer Settings
+        Route::get('/developer-settings', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'index'])->name('admin.developer_settings.index');
     Route::get('/developer-settings/docs', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'docs'])->name('admin.developer_settings.docs');
     Route::post('/developer-settings/generate', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'generateToken'])->name('admin.developer_settings.generate');
     Route::post('/developer-settings/{id}/revoke', [\App\Http\Controllers\Admin\DeveloperSettingController::class, 'revokeToken'])->name('admin.developer_settings.revoke');
@@ -57,7 +59,8 @@ Route::middleware(['auth'])->group(function () {
     // Login History
     Route::get('login-history', [LoginHistoryController::class, 'index'])->name('login_history.index');
     Route::post('login-history/empty', [LoginHistoryController::class, 'empty'])->name('login_history.empty');
-    Route::delete('login-history/{id}', [LoginHistoryController::class, 'destroy'])->name('login_history.destroy');
+        Route::delete('login-history/{id}', [LoginHistoryController::class, 'destroy'])->name('login_history.destroy');
+    });
 
     // WhatsApp Accounts
     Route::get('whatsapp-accounts/trash', [\App\Http\Controllers\Admin\WhatsAppAccountController::class, 'trash'])->name('whatsapp_accounts.trash');
@@ -72,6 +75,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('whatsapp-messages/{id}/resend', [\App\Http\Controllers\Admin\WhatsAppMessageController::class, 'resend'])->name('whatsapp_messages.resend');
     Route::resource('whatsapp-messages', \App\Http\Controllers\Admin\WhatsAppMessageController::class)->only(['index', 'create', 'store', 'destroy'])->names('whatsapp_messages');
     // });
+
+    // Help & Support (Tickets)
+    Route::resource('tickets', \App\Http\Controllers\TicketController::class)->only(['index', 'create', 'store', 'show']);
+    Route::patch('tickets/{ticket}/status', [\App\Http\Controllers\TicketController::class, 'updateStatus'])->name('tickets.status');
 
     // Comments & Engagement
     Route::post('comments', [\App\Http\Controllers\CommentController::class, 'store'])->name('comments.store');

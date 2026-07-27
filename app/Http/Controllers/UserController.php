@@ -29,6 +29,7 @@ class UserController extends Controller
             'job_title' => 'nullable|string|max:255',
             'company' => 'nullable|string|max:255',
             'status' => 'required|string|in:active,inactive,banned',
+            'max_whatsapp_accounts' => 'required|integer|min:1',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -39,6 +40,7 @@ class UserController extends Controller
             'job_title' => $request->job_title,
             'company' => $request->company,
             'status' => $request->status,
+            'max_whatsapp_accounts' => $request->max_whatsapp_accounts,
             'password' => Hash::make($request->password),
         ]);
 
@@ -70,6 +72,7 @@ class UserController extends Controller
             'job_title' => 'nullable|string|max:255',
             'company' => 'nullable|string|max:255',
             'status' => 'required|string|in:active,inactive,banned',
+            'max_whatsapp_accounts' => 'required|integer|min:1',
         ]);
 
         $user->update([
@@ -79,6 +82,7 @@ class UserController extends Controller
             'job_title' => $request->job_title,
             'company' => $request->company,
             'status' => $request->status,
+            'max_whatsapp_accounts' => $request->max_whatsapp_accounts,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');

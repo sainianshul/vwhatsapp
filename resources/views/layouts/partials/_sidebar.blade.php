@@ -31,8 +31,9 @@
 
 
                 {{-- ===================== --}}
-                {{-- PEOPLE --}}
+                {{-- PEOPLE (ADMIN ONLY) --}}
                 {{-- ===================== --}}
+                @if(auth()->user()->role === 'admin')
                 <div class="menu-item pt-5">
                     <div class="menu-content">
                         <span class="menu-heading fw-bold text-uppercase fs-7">People</span>
@@ -77,6 +78,7 @@
                         <span class="menu-title">Login History</span>
                     </a>
                 </div>
+                @endif
 
                 {{-- ===================== --}}
                 {{-- ACCOUNTS --}}
@@ -168,6 +170,18 @@
                 <!--end::Menu Item-->
 
                 <!--begin::Menu Item-->
+                <div class="menu-item">
+                    <a class="menu-link {{ request()->routeIs('tickets.*') ? 'active' : '' }}" href="{{ route('tickets.index') }}">
+                        <span class="menu-icon">
+                            <i class="ki-outline ki-questionnaire-tablet fs-2"></i>
+                        </span>
+                        <span class="menu-title">Help & Support</span>
+                    </a>
+                </div>
+                <!--end::Menu Item-->
+
+                <!--begin::Menu Item-->
+                @if(auth()->user()->role === 'admin')
                 <div class="menu-item pt-5">
                     <div class="menu-content">
                         <span class="menu-heading fw-bold text-uppercase fs-7">Developer</span>
@@ -201,6 +215,7 @@
                         <span class="menu-title">Settings</span>
                     </a>
                 </div>
+                @endif
 
             </div>
             <!--end::Menu-->

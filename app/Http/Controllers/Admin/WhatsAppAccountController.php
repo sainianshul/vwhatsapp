@@ -69,6 +69,12 @@ class WhatsAppAccountController extends Controller
 
     public function create()
     {
+        $user = auth()->user();
+        $currentAccountCount = WhatsAppAccount::where('user_id', $user->id)->count();
+
+        if ($currentAccountCount >= $user->max_whatsapp_accounts) {
+            return redirect()->route('whatsapp_accounts.index')->with('error', 'You have reached the maximum allowed WhatsApp accounts (' . $user->max_whatsapp_accounts . '). Please upgrade your plan or contact support.');
+        }
         // 1. Cleanup abandoned/connecting sessions for this user
         $abandoned = WhatsAppAccount::where('user_id', auth()->id())
             ->where('status', 'connecting')

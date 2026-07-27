@@ -31,7 +31,8 @@ class User extends Authenticatable
         'company',
         'avatar',
         'last_login_at',
-        'last_login_ip'
+        'last_login_ip',
+        'max_whatsapp_accounts'
     ];
 
     /**

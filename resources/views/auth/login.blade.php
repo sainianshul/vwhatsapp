@@ -54,9 +54,11 @@
     </script>
 </head>
 
-<body id="kt_body" class="app-blank bgi-size-cover bgi-position-center">
+<body id="kt_body" class="app-blank bgi-size-cover bgi-position-center bg-light" style="padding-top: 80px; display: flex; flex-direction: column; min-height: 100vh;">
 
-    <div class="d-flex flex-column flex-root" id="kt_app_root">
+    @include('layouts.partials._front_navbar')
+
+    <div class="d-flex flex-column flex-root flex-grow-1" id="kt_app_root">
         <div class="d-flex flex-column flex-lg-row flex-column-fluid">
 
             <div class="d-flex flex-column flex-column-fluid flex-center w-lg-50 p-10">
@@ -66,7 +68,6 @@
                         <img src="{{ asset('icon.png') }}" alt="Logo" class="h-35px me-3" />
                         <span class="text-gray-900 fw-bolder fs-2">VWhatsApp</span>
                     </a>
-                    <span class="badge badge-light-primary fw-semibold fs-8 px-4 py-2">Admin Portal</span>
                 </div>
 
                 <div class="bg-body d-flex flex-column align-items-stretch flex-center rounded-3 w-100 p-10 border border-gray-200 shadow-sm" style="max-width: 420px;">
@@ -190,17 +191,12 @@
 
 
                 </div>
-
-                <div class="d-flex justify-content-center pt-8">
-                    <span class="text-gray-400 fs-8 fw-normal">
-                        &copy; {{ date('Y') }} Schotech. All rights reserved.
-                    </span>
                 </div>
-
             </div>
-
         </div>
     </div>
+
+    @include('layouts.partials._front_footer')
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

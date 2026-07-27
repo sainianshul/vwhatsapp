@@ -92,7 +92,7 @@
                                 <label class="required form-label text-gray-900 fw-semibold">Phone Number</label>
                                 <div class="position-relative">
                                     <i class="ki-outline ki-phone fs-2 position-absolute top-50 translate-middle-y ms-4 text-gray-600"></i>
-                                    <input type="text" name="phone" class="form-control text-gray-900 bg-transparent ps-12 @error('phone') is-invalid border-danger @else border border-gray-300 @enderror"
+                                    <input type="text" name="phone" class="form-control text-gray-900 bg-transparent @error('phone') is-invalid border-danger @else border border-gray-300 @enderror" style="padding-left: 45px !important;"
                                         value="{{ old('phone', $user->phone) }}" placeholder="Enter phone number" required pattern="[0-9+]*" minlength="10" maxlength="15" oninput="this.value = this.value.replace(/[^0-9+]/g, '')" />
                                 </div>
                                 @error('phone')
@@ -107,13 +107,27 @@
                                 <label class="form-label text-gray-900 fw-semibold">Email Address</label>
                                 <div class="position-relative">
                                     <i class="ki-outline ki-sms fs-2 position-absolute top-50 translate-middle-y ms-4 text-gray-900"></i>
-                                    <input type="email" name="email" class="form-control text-gray-900 bg-transparent ps-12 @error('email') is-invalid border-danger @else border border-gray-300 @enderror"
+                                    <input type="email" name="email" class="form-control text-gray-900 bg-transparent @error('email') is-invalid border-danger @else border border-gray-300 @enderror" style="padding-left: 45px !important;"
                                         placeholder="Enter email address" value="{{ old('email', $user->email) }}" />
                                 </div>
                                 @error('email')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                                 <div class="text-gray-600 fs-7 mt-2">Optional email address for communication and notifications.</div>
+                            </div>
+                            <!--end::Input group-->
+
+                            <!--begin::Input group-->
+                            <div class="mb-7">
+                                <label class="required form-label text-gray-900 fw-semibold">Max WhatsApp Accounts</label>
+                                <div class="position-relative">
+                                    <input type="number" name="max_whatsapp_accounts" class="form-control text-gray-900 bg-transparent @error('max_whatsapp_accounts') is-invalid border-danger @else border border-gray-300 @enderror"
+                                        placeholder="Enter max accounts" value="{{ old('max_whatsapp_accounts', $user->max_whatsapp_accounts) }}" min="1" required />
+                                </div>
+                                @error('max_whatsapp_accounts')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                                <div class="text-gray-600 fs-7 mt-2">Maximum number of WhatsApp accounts this user can connect.</div>
                             </div>
                             <!--end::Input group-->
                         </div>

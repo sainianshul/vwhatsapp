@@ -53,6 +53,7 @@
 
             <div class="separator my-2" style="border-color: rgba(0,0,0,0.05);"></div>
 
+            {{-- 
             <!--begin::Theme mode (Premium Nested Dropdown)-->
             <div class="menu-item px-3 my-2 premium-dropdown-parent">
                 <a href="#" class="menu-link px-3 py-2 rounded d-flex justify-content-between align-items-center text-gray-800" style="text-decoration: none;">
@@ -83,6 +84,7 @@
                 </div>
             </div>
             <!--end::Theme mode-->
+            --}}
 
             <div class="separator my-2" style="border-color: rgba(0,0,0,0.05);"></div>
 

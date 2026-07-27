@@ -17,7 +17,7 @@
         <div class="app-navbar flex-lg-grow-1" id="kt_app_header_navbar">
             <div class="app-navbar-item d-flex align-items-stretch flex-lg-grow-1">
                 <!--begin::Search-->
-                <div id="kt_header_search" class="header-search d-flex align-items-center w-lg-200px"
+                <div id="kt_header_search" class="header-search d-flex align-items-center w-lg-250px"
                     data-kt-search-keypress="true" data-kt-search-min-length="2" data-kt-search-enter="enter"
                     data-kt-search-layout="menu" data-kt-search-responsive="true" data-kt-menu-trigger="auto"
                     data-kt-menu-permanent="true" data-kt-menu-placement="bottom-start">
@@ -35,8 +35,8 @@
                         <input type="hidden" />
                         <i
                             class="ki-outline ki-magnifier search-icon fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-5"></i>
-                        <input type="text" class="search-input form-control form-control rounded-1 ps-13" name="search"
-                            value="" placeholder="Search..." data-kt-search-element="input" />
+                        <input type="text" class="search-input form-control form-control-solid rounded-pill ps-13" name="search"
+                            value="" placeholder="Search VWhatsApp..." data-kt-search-element="input" />
                         <span class="search-spinner position-absolute top-50 end-0 translate-middle-y lh-0 d-none me-5"
                             data-kt-search-element="spinner">
                             <span class="spinner-border h-15px w-15px align-middle text-gray-400"></span>
