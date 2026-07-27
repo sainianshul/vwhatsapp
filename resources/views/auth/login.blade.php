@@ -54,11 +54,9 @@
     </script>
 </head>
 
-<body id="kt_body" class="app-blank bgi-size-cover bgi-position-center bg-light" style="padding-top: 80px; display: flex; flex-direction: column; min-height: 100vh;">
+<body id="kt_body" class="app-blank bgi-size-cover bgi-position-center">
 
-    @include('layouts.partials._front_navbar')
-
-    <div class="d-flex flex-column flex-root flex-grow-1" id="kt_app_root">
+    <div class="d-flex flex-column flex-root" id="kt_app_root">
         <div class="d-flex flex-column flex-lg-row flex-column-fluid">
 
             <div class="d-flex flex-column flex-column-fluid flex-center w-lg-50 p-10">
@@ -191,12 +189,14 @@
 
 
                 </div>
+                <div class="d-flex justify-content-center pt-8">
+                    <span class="text-gray-400 fs-8 fw-normal">
+                        &copy; {{ date('Y') }} VWhatsApp. All rights reserved.
+                    </span>
                 </div>
             </div>
         </div>
     </div>
-
-    @include('layouts.partials._front_footer')
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
