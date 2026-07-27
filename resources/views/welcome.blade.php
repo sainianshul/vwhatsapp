@@ -81,7 +81,6 @@
                         Scale your business with bulk messaging, seamless multi-account management, and robust developer APIs. Connect with your customers instantly, reliably, and efficiently.
                     </p>
                     <div class="d-flex flex-column flex-sm-row justify-content-center gap-4">
-                        <a href="{{ route('login') }}" class="btn btn-success btn-custom shadow-sm">Get Started Now</a>
                         <a href="#features" class="btn btn-light btn-custom text-gray-800 fw-bold border border-gray-300">Explore Features</a>
                     </div>
                 </div>

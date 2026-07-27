@@ -2,7 +2,7 @@
     <div class="d-flex align-items-center">
         <a href="{{ route('home') }}" class="d-flex align-items-center text-decoration-none">
             <img alt="Logo" src="{{ asset('icon.png') }}" class="h-30px me-3" />
-            <h3 class="m-0 fw-bolder text-gray-900 fs-2">VWhatsApp</h3>
+            <h3 class="m-0 fw-bolder text-success fs-2">VWhatsApp</h3>
         </a>
     </div>
     <div>
