@@ -4,7 +4,7 @@
             <div class="col-md-6 mb-10 mb-md-0">
                 <div class="d-flex align-items-center justify-content-center justify-content-md-start mb-5">
                     <img alt="Logo" src="{{ asset('icon.png') }}" class="h-40px me-3" />
-                    <h3 class="m-0 fw-bolder text-gray-900 fs-2">VWhatsApp</h3>
+                    <h3 class="m-0 fw-bolder text-success fs-2">VWhatsApp</h3>
                 </div>
                 <p class="text-gray-600 fs-6 pe-md-10">
                     The ultimate SaaS platform for scaling your WhatsApp communication, managing multiple accounts, and integrating APIs.

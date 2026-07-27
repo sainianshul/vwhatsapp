@@ -8,7 +8,7 @@
             </div>
             <a href="{{ route('dashboard') }}" class="d-flex align-items-center text-decoration-none">
                 <img src="{{ asset('icon.png') }}" alt="Logo" class="h-25px me-2" />
-                <span class="text-gray-900 fw-bolder fs-4">VWhatsApp</span>
+                <span class="text-success fw-bolder fs-4">VWhatsApp</span>
             </a>
         </div>
         <!--end::Sidebar toggle-->
