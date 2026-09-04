@@ -5,7 +5,7 @@
     <div class="app-sidebar-logo flex-shrink-0 d-none d-md-flex align-items-center px-8" id="kt_app_sidebar_logo">
         <a href="<?php echo e(route('dashboard')); ?>" class="d-flex align-items-center mb-0 text-decoration-none">
             <img src="<?php echo e(asset('icon.png')); ?>" alt="Logo" class="h-30px me-3" />
-            <h1 class="text-gray-900 fs-2 fw-bolder mb-0 ls-1">VWhatsApp</h1>
+            <h1 class="text-success fs-2 fw-bolder mb-0 ls-1">VWhatsApp</h1>
         </a>
     </div>
     <!--end::Logo-->
@@ -33,6 +33,7 @@
                 
                 
                 
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->role === 'admin'): ?>
                 <div class="menu-item pt-5">
                     <div class="menu-content">
                         <span class="menu-heading fw-bold text-uppercase fs-7">People</span>
@@ -77,6 +78,7 @@
                         <span class="menu-title">Login History</span>
                     </a>
                 </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 
                 
@@ -168,6 +170,18 @@
                 <!--end::Menu Item-->
 
                 <!--begin::Menu Item-->
+                <div class="menu-item">
+                    <a class="menu-link <?php echo e(request()->routeIs('tickets.*') ? 'active' : ''); ?>" href="<?php echo e(route('tickets.index')); ?>">
+                        <span class="menu-icon">
+                            <i class="ki-outline ki-questionnaire-tablet fs-2"></i>
+                        </span>
+                        <span class="menu-title">Help & Support</span>
+                    </a>
+                </div>
+                <!--end::Menu Item-->
+
+                <!--begin::Menu Item-->
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->role === 'admin'): ?>
                 <div class="menu-item pt-5">
                     <div class="menu-content">
                         <span class="menu-heading fw-bold text-uppercase fs-7">Developer</span>
@@ -201,6 +215,7 @@
                         <span class="menu-title">Settings</span>
                     </a>
                 </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
             </div>
             <!--end::Menu-->

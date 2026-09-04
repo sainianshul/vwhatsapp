@@ -46,8 +46,20 @@ class BulkCampaignController extends Controller
         // Store CSV file
         $path = $request->file('csv_file')->store('campaigns/csv', 'local');
 
+        // Convert CSV to UTF-8 if needed (handles Hindi/regional text from Excel)
+        $fullPath = Storage::path($path);
+        $rawContent = file_get_contents($fullPath);
+        $encoding = mb_detect_encoding($rawContent, ['UTF-8', 'Windows-1252', 'ISO-8859-1', 'ASCII'], true);
+        if ($encoding && $encoding !== 'UTF-8') {
+            $rawContent = mb_convert_encoding($rawContent, 'UTF-8', $encoding);
+        }
+        // Remove UTF-8 BOM if present
+        $rawContent = preg_replace('/^\xEF\xBB\xBF/', '', $rawContent);
+        file_put_contents($fullPath, $rawContent);
+        unset($rawContent);
+
         // Count total contacts (basic count)
-        $file = fopen(Storage::path($path), 'r');
+        $file = fopen($fullPath, 'r');
         $headers = fgetcsv($file); // Skip header
 
         // Validate CSV Headers

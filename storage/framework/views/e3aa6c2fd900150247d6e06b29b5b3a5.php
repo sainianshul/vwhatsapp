@@ -66,7 +66,6 @@
                         <img src="<?php echo e(asset('icon.png')); ?>" alt="Logo" class="h-35px me-3" />
                         <span class="text-gray-900 fw-bolder fs-2">VWhatsApp</span>
                     </a>
-                    <span class="badge badge-light-primary fw-semibold fs-8 px-4 py-2">Admin Portal</span>
                 </div>
 
                 <div class="bg-body d-flex flex-column align-items-stretch flex-center rounded-3 w-100 p-10 border border-gray-200 shadow-sm" style="max-width: 420px;">
@@ -102,7 +101,7 @@
                         <?php echo csrf_field(); ?>
 
                         <div class="fv-row mb-5">
-                            <label class="form-label text-gray-500 text-uppercase fw-bold fs-9 mb-2 required">
+                            <label class="form-label text-gray-900 fw-medium fs-7 mb-2 required">
                                 Email Address
                             </label>
                             <div class="input-group border border-gray-300 rounded">
@@ -143,7 +142,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                         </div>
 
                         <div class="fv-row mb-5" data-kt-password-meter="true">
-                            <label class="form-label text-gray-500 text-uppercase fw-bold fs-9 mb-2 required">
+                            <label class="form-label text-gray-900 fw-medium fs-7 mb-2 required">
                                 Password
                             </label>
                             <div class="input-group border border-gray-300 rounded" id="kt_password_input">
@@ -219,15 +218,12 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
 
                 </div>
-
                 <div class="d-flex justify-content-center pt-8">
                     <span class="text-gray-400 fs-8 fw-normal">
-                        &copy; <?php echo e(date('Y')); ?> Schotech. All rights reserved.
+                        &copy; <?php echo e(date('Y')); ?> VWhatsApp. All rights reserved.
                     </span>
                 </div>
-
             </div>
-
         </div>
     </div>
 

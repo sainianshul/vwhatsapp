@@ -56,36 +56,7 @@
 
             <div class="separator my-2" style="border-color: rgba(0,0,0,0.05);"></div>
 
-            <!--begin::Theme mode (Premium Nested Dropdown)-->
-            <div class="menu-item px-3 my-2 premium-dropdown-parent">
-                <a href="#" class="menu-link px-3 py-2 rounded d-flex justify-content-between align-items-center text-gray-800" style="text-decoration: none;">
-                    <span class="menu-title fw-bold">Mode</span>
-                    <span class="menu-icon"><i class="ki-outline ki-night-day fs-3"></i></span>
-                </a>
-                
-                <!-- Sub Menu -->
-                <div class="premium-dropdown-sub rounded">
-                    <div class="menu-item px-1 my-1">
-                        <a href="#" class="menu-link px-3 py-2 rounded d-flex align-items-center text-gray-800" data-kt-element="mode" data-kt-value="light" style="text-decoration: none;">
-                            <span class="menu-icon me-2"><i class="ki-outline ki-night-day fs-3"></i></span>
-                            <span class="menu-title fw-bold">Light</span>
-                        </a>
-                    </div>
-                    <div class="menu-item px-1 my-1">
-                        <a href="#" class="menu-link px-3 py-2 rounded d-flex align-items-center text-gray-800" data-kt-element="mode" data-kt-value="dark" style="text-decoration: none;">
-                            <span class="menu-icon me-2"><i class="ki-outline ki-moon fs-3"></i></span>
-                            <span class="menu-title fw-bold">Dark</span>
-                        </a>
-                    </div>
-                    <div class="menu-item px-1 my-1">
-                        <a href="#" class="menu-link px-3 py-2 rounded d-flex align-items-center text-gray-800" data-kt-element="mode" data-kt-value="system" style="text-decoration: none;">
-                            <span class="menu-icon me-2"><i class="ki-outline ki-screen fs-3"></i></span>
-                            <span class="menu-title fw-bold">System</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <!--end::Theme mode-->
+            
 
             <div class="separator my-2" style="border-color: rgba(0,0,0,0.05);"></div>
 

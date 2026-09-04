@@ -29,44 +29,33 @@
 <?php unset($__componentOriginale19f62b34dfe0bfdf95075badcb45bc2); ?>
 <?php endif; ?>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header pt-7 border-bottom">
-            <h3 class="card-title align-items-start flex-column">
-                <span class="card-label fw-bold text-dark fs-4">API Documentation</span>
-                <span class="text-muted mt-1 fw-semibold fs-7">Quick integration guide</span>
-            </h3>
-            <div class="card-toolbar">
-                <a href="<?php echo e(route('admin.developer_settings.index')); ?>" class="btn btn-sm btn-light">Back to Settings</a>
-            </div>
-        </div>
-        <div class="card-body pt-6">
+    <div class="card">
+        <div class="card-body">
             
-            <div class="mb-8">
-                <h5 class="fw-bold text-dark mb-3">Endpoint</h5>
-                <div class="d-flex align-items-center bg-light-primary border border-primary border-dashed p-3 rounded" style="max-width: 600px;">
-                    <span class="badge badge-primary me-3 fs-7">POST</span>
-                    <span class="text-primary fw-bold fs-6"><?php echo e(url('/api/v1/messages/send')); ?></span>
-                </div>
-            </div>
+            <h4 class="mb-5">WhatsApp Sending API Documentation</h4>
+            <p>Use the following API to send WhatsApp messages from your external CRM or application.</p>
+            
+            <hr>
 
-            <div class="mb-8">
-                <h5 class="fw-bold text-dark mb-3">Authentication Header</h5>
-                <div class="bg-light p-4 rounded border border-gray-300" style="max-width: 600px;">
-                    <code class="text-dark fs-6 d-block mb-1">Content-Type: <span class="text-primary">application/json</span></code>
-                    <code class="text-dark fs-6 d-block">Authorization: Bearer <span class="text-danger">YOUR_API_KEY</span></code>
-                </div>
-            </div>
+            <h5 class="mt-5">1. Endpoint URL</h5>
+            <p>Make a <strong>POST</strong> request to the following URL:</p>
+            <code><?php echo e(url('/api/v1/messages/send')); ?></code>
 
-            <div class="mb-0">
-                <h5 class="fw-bold text-dark mb-3">JSON Request Body</h5>
-                <div class="bg-light p-4 rounded border border-gray-300" style="max-width: 600px;">
-                    <pre class="mb-0"><code class="text-dark fs-6">{
-  <span class="text-primary">"to"</span>: <span class="text-success">"919876543210"</span>,
-  <span class="text-primary">"text"</span>: <span class="text-success">"Hello from CRM!"</span>,
-  <span class="text-muted">"from"</span>: <span class="text-success">"918888888888"</span> <span class="text-muted">// Optional</span>
+            <h5 class="mt-5">2. Required Headers</h5>
+            <p>You must provide the following HTTP headers in your request:</p>
+            <ul>
+                <li><strong>Content-Type:</strong> <code>application/json</code></li>
+                <li><strong>Authorization:</strong> <code>Bearer YOUR_API_KEY_HERE</code></li>
+            </ul>
+
+            <h5 class="mt-5">3. JSON Request Body</h5>
+            <p>Provide the data in JSON format:</p>
+            <pre class="bg-light p-3 rounded" style="max-width: 500px;"><code>{
+  "to": "919876543210",
+  "text": "Hello from CRM!"
 }</code></pre>
-                </div>
-            </div>
+
+            <p class="mt-5 mb-0"><strong>Note:</strong> The "to" field must include the country code without any + or spaces.</p>
 
         </div>
     </div>

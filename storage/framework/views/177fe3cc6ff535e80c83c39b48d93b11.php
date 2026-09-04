@@ -110,13 +110,12 @@
                             </div>
                         </div>
                         <div class="fv-row mb-7">
-                            <label class="required fs-6 fw-semibold mb-2">Asset Name (Readable)</label>
-                            <input type="text" class="form-control form-control-solid" name="name" placeholder="e.g. Rohtak Promo Video" required />
+                            <label class="required form-label">Asset Name (Readable)</label>
+                            <input type="text" class="form-control" name="name" placeholder="e.g. Rohtak Promo Video" required />
                         </div>
                         <div class="fv-row mb-7">
-                            <label class="required fs-6 fw-semibold mb-2">Media File</label>
-                            <input type="file" class="form-control form-control-solid" name="file" required accept="image/*,video/*,application/pdf" />
-                            <div class="text-muted fs-7 mt-2">Max file size is 16MB. Allowed types: Images, Videos, PDFs.</div>
+                            <label class="required form-label">Media File</label>
+                            <input type="file" class="form-control" name="file" required accept="image/*,video/*,application/pdf" />
                         </div>
                     </div>
                     <div class="modal-footer flex-center">
@@ -147,8 +146,8 @@
                     </div>
                     <div class="modal-body py-10 px-lg-17">
                         <div class="fv-row mb-7">
-                            <label class="required fs-6 fw-semibold mb-2">Asset Name</label>
-                            <input type="text" id="editAssetName" class="form-control form-control-solid" name="name" required />
+                            <label class="required form-label">Asset Name</label>
+                            <input type="text" id="editAssetName" class="form-control" name="name" required />
                         </div>
                     </div>
                     <div class="modal-footer flex-center">
@@ -247,14 +246,58 @@
                     title: 'Data refreshed successfully'
                 });
             });
+
+            $(document).on('click', '.btn-delete', function () {
+                let url = $(this).data('url');
+                Swal.fire({
+                    title: 'Delete Asset?',
+                    text: 'This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Delete',
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-light ms-2'
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+
+                    $.post(url, {
+                        _method: 'DELETE',
+                        _token: '<?php echo e(csrf_token()); ?>'
+                    })
+                    .done(function (res) {
+                        table.ajax.reload(null, false);
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 1500, icon: 'success', title: 'Asset deleted successfully' });
+                    })
+                    .fail(function (xhr) {
+                        Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 3000, icon: 'error', title: xhr.responseJSON?.message || 'Something went wrong.' });
+                    });
+                });
+            });
         });
 
         // Copy functionality
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(function() {
-                toastr.success("Code copied to clipboard: " + text);
+                Swal.fire({
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    icon: 'success',
+                    title: "Code copied: " + text
+                });
             }, function(err) {
-                toastr.error("Failed to copy code");
+                Swal.fire({
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    icon: 'error',
+                    title: "Failed to copy code"
+                });
             });
         }
 
@@ -273,14 +316,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    toastr.success("Asset status updated.");
+                    Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 2000, icon: 'success', title: "Asset status updated." });
                 } else {
-                    toastr.error("Failed to update status.");
+                    Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 2000, icon: 'error', title: "Failed to update status." });
                     table.ajax.reload(null, false); // Reload to reset switch state on error
                 }
             })
             .catch(err => {
-                toastr.error("Error connecting to server.");
+                Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 2000, icon: 'error', title: "Error connecting to server." });
                 table.ajax.reload(null, false); // Reload to reset switch state on error
             });
         }

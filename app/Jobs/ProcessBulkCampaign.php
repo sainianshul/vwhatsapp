@@ -45,11 +45,27 @@ class ProcessBulkCampaign implements ShouldQueue
 
         try {
             $filePath = Storage::path($this->campaign->csv_file_path);
-            $file = fopen($filePath, 'r');
+
+            // Convert CSV file to UTF-8 if needed (handles Hindi/regional text from Excel)
+            $rawContent = file_get_contents($filePath);
+            $encoding = mb_detect_encoding($rawContent, ['UTF-8', 'Windows-1252', 'ISO-8859-1', 'ASCII'], true);
+            if ($encoding && $encoding !== 'UTF-8') {
+                $rawContent = mb_convert_encoding($rawContent, 'UTF-8', $encoding);
+            }
+            // Remove UTF-8 BOM if present
+            $rawContent = preg_replace('/^\xEF\xBB\xBF/', '', $rawContent);
+            // Write back cleaned content to a temp file for fgetcsv
+            $tempPath = $filePath . '.utf8.tmp';
+            file_put_contents($tempPath, $rawContent);
+            unset($rawContent); // Free memory
+
+            $file = fopen($tempPath, 'r');
             
             // Read Headers
             $headers = fgetcsv($file);
             if (!$headers) {
+                fclose($file);
+                @unlink($tempPath);
                 throw new \Exception("CSV file is empty or invalid.");
             }
 
@@ -123,6 +139,8 @@ class ProcessBulkCampaign implements ShouldQueue
                 $rowVariables = [];
                 foreach ($headers as $index => $header) {
                     $val = $row[$index] ?? '';
+                    // Ensure each value is valid UTF-8 (safety net for Hindi/regional text)
+                    $val = mb_convert_encoding($val, 'UTF-8', 'UTF-8');
                     // Replace {{header}} with actual value
                     $messageText = str_ireplace('{{' . $header . '}}', $val, $messageText);
                     $rowVariables[$header] = $val;
@@ -262,6 +280,7 @@ class ProcessBulkCampaign implements ShouldQueue
             }
             
             fclose($file);
+            @unlink($tempPath); // Clean up temp UTF-8 file
 
             if ($this->campaign->status === 'running') {
                 $this->campaign->update(['status' => 'completed']);

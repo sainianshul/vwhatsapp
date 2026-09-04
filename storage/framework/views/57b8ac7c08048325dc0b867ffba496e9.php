@@ -42,8 +42,7 @@
             <div class="card-body pt-5">
                 <div class="mb-5">
                     <label class="form-label fw-bold">Custom Name (Alias)</label>
-                    <input type="text" name="name" class="form-control form-control-solid" placeholder="e.g. Sales Team, Support Line" value="<?php echo e(old('name', $account->name)); ?>">
-                    <div class="text-muted fs-7 mt-2">Set a custom name to easily identify this account in dropdowns and reports.</div>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Sales Team, Support Line" value="<?php echo e(old('name', $account->name)); ?>">
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -58,7 +57,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                 
                 <div class="mb-5">
                     <label class="form-label fw-bold">WhatsApp Name (Push Name)</label>
-                    <input type="text" class="form-control form-control-solid text-gray-500" value="<?php echo e($account->push_name ?? 'N/A'); ?>" readonly>
+                    <input type="text" class="form-control bg-light text-gray-500" value="<?php echo e($account->push_name ?? 'N/A'); ?>" readonly>
                 </div>
 
                 <div class="mb-5">
