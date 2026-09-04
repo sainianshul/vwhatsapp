@@ -108,6 +108,11 @@ class ProcessBulkCampaign implements ShouldQueue
                 throw new \Exception("Campaign uses Dynamic Media, but CSV is missing 'media_code' column.");
             }
 
+            // Anti-Ban Batch Cooldown: after every N messages, take a long break
+            $batchSize = 100;          // messages per batch
+            $cooldownSeconds = 600;    // 10 minutes cooldown
+            $batchCounter = 0;
+
             while (($row = fgetcsv($file)) !== false) {
                 // Reconnect DB in case MySQL dropped idle connection during sleep
                 DB::reconnect();
@@ -277,6 +282,21 @@ class ProcessBulkCampaign implements ShouldQueue
                 // Sleep to avoid Ban (Anti-Ban feature)
                 $delay = rand($this->campaign->delay_min, $this->campaign->delay_max);
                 sleep($delay);
+
+                // Batch Cooldown: after every 100 messages, rest for 10 minutes
+                $batchCounter++;
+                if ($batchCounter >= $batchSize) {
+                    Log::info("Campaign {$this->campaign->id}: Batch of {$batchSize} messages sent. Cooling down for " . ($cooldownSeconds / 60) . " minutes.");
+                    sleep($cooldownSeconds);
+                    $batchCounter = 0;
+
+                    // Re-check campaign status after cooldown
+                    DB::reconnect();
+                    $this->campaign->refresh();
+                    if ($this->campaign->trashed() || $this->campaign->status !== 'running') {
+                        break;
+                    }
+                }
             }
             
             fclose($file);
