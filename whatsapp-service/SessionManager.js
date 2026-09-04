@@ -529,7 +529,17 @@ class SessionManager {
                 throw new Error(`The number ${cleanTo} is not registered on WhatsApp.`);
             }
 
-            return await client.sendMessage(numberDetails._serialized, message);
+            const result = await client.sendMessage(numberDetails._serialized, message);
+
+            // Archive chat after sending to keep chat list clean (bulk campaigns)
+            try {
+                const chat = await result.getChat();
+                if (chat) await chat.archive();
+            } catch (archiveErr) {
+                console.warn(`[SessionManager] Archive failed for ${cleanTo}: ${archiveErr.message}`);
+            }
+
+            return result;
         } catch (err) {
             if (this._isPuppeteerCrash(err)) {
                 console.error(`[SessionManager] Puppeteer crash in sendMessage for ${sessionId}: ${err.message}`);
@@ -596,7 +606,17 @@ class SessionManager {
                 options.caption = caption;
             }
 
-            return await client.sendMessage(numberDetails._serialized, media, options);
+            const result = await client.sendMessage(numberDetails._serialized, media, options);
+
+            // Archive chat after sending to keep chat list clean (bulk campaigns)
+            try {
+                const chat = await result.getChat();
+                if (chat) await chat.archive();
+            } catch (archiveErr) {
+                console.warn(`[SessionManager] Archive failed for ${cleanTo}: ${archiveErr.message}`);
+            }
+
+            return result;
         } catch (err) {
             if (this._isPuppeteerCrash(err)) {
                 console.error(`[SessionManager] Puppeteer crash in sendMediaMessage for ${sessionId}: ${err.message}`);
