@@ -54,11 +54,10 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    container_name: vwhatsapp_queue_bulk
-
+    # NOTE: container_name removed to allow multiple replicas
     restart: unless-stopped
 
-    command: php artisan queue:work --queue=bulk --sleep=3 --tries=1 --timeout=0
+    command: php artisan queue:work --queue=bulk --sleep=3 --tries=3 --timeout=0
 
     working_dir: /var/www
 
@@ -71,6 +70,10 @@ services:
     depends_on:
       - mysql
       - redis
+
+    deploy:
+      replicas: 5
+
 
   nginx:
 
@@ -147,7 +150,7 @@ services:
       - TZ=Asia/Kolkata
 
     # Chromium needs more shared memory — without this it crashes randomly
-    shm_size: '1gb'
+    shm_size: '2gb'
 
     # Auto-restart if service becomes unhealthy
     healthcheck:

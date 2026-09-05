@@ -32,6 +32,45 @@ class SessionManager {
 
         // Start heartbeat monitoring
         this._startHeartbeat();
+
+        // Graceful shutdown — cleanly destroy all browsers so auth data stays intact
+        this._setupGracefulShutdown();
+    }
+
+    /**
+     * Handle SIGTERM/SIGINT to cleanly close all browsers.
+     * This prevents auth data corruption when Docker restarts the container.
+     */
+    _setupGracefulShutdown() {
+        const shutdown = async (signal) => {
+            console.log(`[SessionManager] Received ${signal}. Gracefully shutting down all sessions...`);
+            
+            // Stop heartbeat
+            if (this.heartbeatInterval) {
+                clearInterval(this.heartbeatInterval);
+            }
+
+            // Destroy all browser instances cleanly (but keep auth data on disk!)
+            const destroyPromises = [];
+            for (const [sessionId, client] of this.sessions.entries()) {
+                console.log(`[SessionManager] Shutting down session: ${sessionId}`);
+                destroyPromises.push(
+                    client.destroy()
+                        .then(() => console.log(`[SessionManager] Session ${sessionId} destroyed cleanly.`))
+                        .catch(err => console.error(`[SessionManager] Error destroying ${sessionId}:`, err.message))
+                );
+            }
+
+            try {
+                await Promise.allSettled(destroyPromises);
+            } catch (e) {}
+
+            console.log(`[SessionManager] All sessions shut down. Exiting.`);
+            process.exit(0);
+        };
+
+        process.on('SIGTERM', () => shutdown('SIGTERM'));
+        process.on('SIGINT', () => shutdown('SIGINT'));
     }
 
     // ═══════════════════════════════════════════════════════════════════
