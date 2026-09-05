@@ -26,6 +26,8 @@ class BulkCampaign extends Model
         'scheduled_at',
         'delay_min',
         'delay_max',
+        'batch_size',
+        'cooldown_minutes',
     ];
 
     protected $casts = [

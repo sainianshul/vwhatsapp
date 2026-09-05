@@ -54,7 +54,7 @@
 
     function openDrawer() {
         if (!sidebar) return;
-        sidebar.classList.add('drawer-on');
+        sidebar.classList.add('drawer', 'drawer-start', 'drawer-on');
         getOverlay().style.display = 'block';
         document.body.style.overflow = 'hidden';
     }
@@ -62,6 +62,11 @@
     function closeDrawer() {
         if (!sidebar) return;
         sidebar.classList.remove('drawer-on');
+        setTimeout(function() {
+            if (!sidebar.classList.contains('drawer-on')) {
+                sidebar.classList.remove('drawer', 'drawer-start');
+            }
+        }, 300); // Wait for CSS transition
         if (overlay) overlay.style.display = 'none';
         document.body.style.overflow = '';
     }

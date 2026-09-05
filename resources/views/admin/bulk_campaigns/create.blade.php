@@ -164,6 +164,20 @@
                                     </div>
                                 </div>
 
+                                <h4 class="fs-5 fw-bold text-gray-800 mb-4">Batch Cooldown</h4>
+                                <div class="row mb-7">
+                                    <div class="col-6">
+                                        <label class="form-label fw-semibold fs-7">Batch Size</label>
+                                        <input type="number" name="batch_size" class="form-control form-control-sm" value="50" min="5" required />
+                                        <div class="form-text text-muted fs-8">Kitne messages ke baad break lena hai</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label fw-semibold fs-7">Cooldown (min)</label>
+                                        <input type="number" name="cooldown_minutes" class="form-control form-control-sm" value="5" min="1" required />
+                                        <div class="form-text text-muted fs-8">Break ka time (minutes)</div>
+                                    </div>
+                                </div>
+
                                 <!-- Live Preview -->
                                 <h4 class="fs-5 fw-bold text-gray-800 mb-4">Live Preview</h4>
                                 <div class="p-5 mb-5 rounded" style="background-color: #efeae2; min-height: 200px; border-radius: 8px;">

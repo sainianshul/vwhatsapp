@@ -37,6 +37,8 @@ class BulkCampaignController extends Controller
             'scheduled_at' => 'nullable|date|after:now',
             'delay_min' => 'required|integer|min:1',
             'delay_max' => 'required|integer|gt:delay_min',
+            'batch_size' => 'required|integer|min:5',
+            'cooldown_minutes' => 'required|integer|min:1',
         ]);
 
         $account = WhatsAppAccount::where('user_id', auth()->id())
@@ -122,6 +124,8 @@ class BulkCampaignController extends Controller
             'scheduled_at' => $scheduledAt,
             'delay_min' => $request->delay_min,
             'delay_max' => $request->delay_max,
+            'batch_size' => $request->batch_size,
+            'cooldown_minutes' => $request->cooldown_minutes,
         ]);
 
         // Dispatch Job (with delay if scheduled)
@@ -142,7 +146,11 @@ class BulkCampaignController extends Controller
             abort(403);
         }
 
-        return $dataTable->withCampaignId($bulkCampaign->id)->render('admin.bulk_campaigns.show', compact('bulkCampaign'));
+        $connectedAccounts = WhatsAppAccount::where('user_id', auth()->id())
+            ->where('status', 'connected')
+            ->get();
+
+        return $dataTable->withCampaignId($bulkCampaign->id)->render('admin.bulk_campaigns.show', compact('bulkCampaign', 'connectedAccounts'));
     }
 
     public function stats(BulkCampaign $bulkCampaign)
@@ -295,5 +303,35 @@ class BulkCampaignController extends Controller
         ProcessBulkCampaign::dispatch($bulkCampaign);
 
         return response()->json(['message' => 'Campaign resumed successfully.']);
+    }
+
+    public function changeAccount(Request $request, BulkCampaign $bulkCampaign)
+    {
+        if ($bulkCampaign->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($bulkCampaign->status !== 'paused') {
+            return response()->json(['message' => 'Account can only be changed when campaign is paused.'], 400);
+        }
+
+        $request->validate([
+            'whatsapp_account_id' => 'required|exists:whats_app_accounts,id',
+        ]);
+
+        $account = WhatsAppAccount::where('user_id', auth()->id())
+            ->where('id', $request->whatsapp_account_id)
+            ->where('status', 'connected')
+            ->first();
+
+        if (!$account) {
+            return response()->json(['message' => 'Selected account is not connected. Please connect it first.'], 400);
+        }
+
+        $bulkCampaign->update(['whatsapp_account_id' => $account->id]);
+
+        return response()->json([
+            'message' => 'Account changed to ' . ($account->phone_number ?? $account->push_name ?? 'Unknown') . ' successfully.',
+        ]);
     }
 }

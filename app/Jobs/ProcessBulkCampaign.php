@@ -109,8 +109,8 @@ class ProcessBulkCampaign implements ShouldQueue
             }
 
             // Anti-Ban Batch Cooldown: after every N messages, take a long break
-            $batchSize = 100;          // messages per batch
-            $cooldownSeconds = 600;    // 10 minutes cooldown
+            $batchSize = $this->campaign->batch_size ?? 50;
+            $cooldownSeconds = ($this->campaign->cooldown_minutes ?? 5) * 60;
             $batchCounter = 0;
 
             while (($row = fgetcsv($file)) !== false) {

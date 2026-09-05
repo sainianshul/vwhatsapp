@@ -22,7 +22,7 @@
 <!--end::SweetAlert2-->
 
 <!--begin::Custom Sidebar (lightweight, zero-dependency ~3KB)-->
-<script src="{{ asset('js/admin-sidebar.js') }}?v=8"></script>
+<script src="{{ asset('js/admin-sidebar.js') }}?v=9"></script>
 <!--end::Custom Sidebar-->
 
 {{-- DataTables bundle — only on table pages --}}

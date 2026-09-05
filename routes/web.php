@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bulk-campaigns/{bulkCampaign}/stats', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'stats'])->name('admin.bulk_campaigns.stats');
     Route::post('/bulk-campaigns/{bulkCampaign}/pause', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'pause'])->name('admin.bulk_campaigns.pause');
     Route::post('/bulk-campaigns/{bulkCampaign}/resume', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'resume'])->name('admin.bulk_campaigns.resume');
+    Route::post('/bulk-campaigns/{bulkCampaign}/change-account', [\App\Http\Controllers\Admin\BulkCampaignController::class, 'changeAccount'])->name('admin.bulk_campaigns.change_account');
     Route::resource('bulk-campaigns', \App\Http\Controllers\Admin\BulkCampaignController::class, [
         'names' => 'admin.bulk_campaigns',
         'only' => ['index', 'create', 'store', 'show', 'destroy']

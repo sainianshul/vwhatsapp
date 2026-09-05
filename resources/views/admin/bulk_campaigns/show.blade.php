@@ -86,6 +86,88 @@
         </div>
     </div>
 
+    {{-- Campaign Controls --}}
+    <div class="card shadow-sm mb-8">
+        <div class="card-header border-0 pt-5 pb-3">
+            <h3 class="card-title align-items-start flex-column">
+                <span class="card-label fw-bold fs-3 mb-1">Campaign Controls</span>
+            </h3>
+        </div>
+        <div class="card-body border-top pt-6">
+            <div class="row g-5">
+                {{-- Current Account --}}
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="symbol symbol-40px">
+                            <span class="symbol-label bg-light-success">
+                                <i class="ki-outline ki-message-text-2 fs-2 text-success"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <div class="fs-7 text-muted fw-semibold">Current Account</div>
+                            <div class="fs-6 fw-bold text-gray-900" id="current-account-label">
+                                {{ $bulkCampaign->whatsappAccount->phone_number ?? $bulkCampaign->whatsappAccount->push_name ?? 'Unknown' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($bulkCampaign->status === 'paused')
+                        <div class="mt-4">
+                            <label class="form-label fw-semibold fs-7 text-gray-700">Switch Account</label>
+                            <div class="d-flex gap-2">
+                                <select id="change-account-select" class="form-select form-select-sm">
+                                    @foreach($connectedAccounts as $acc)
+                                        <option value="{{ $acc->id }}" {{ $acc->id == $bulkCampaign->whatsapp_account_id ? 'selected' : '' }}>
+                                            {{ $acc->phone_number }} ({{ $acc->push_name }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="button" class="btn btn-sm btn-light-primary border border-primary fw-bold text-nowrap" id="btn-change-account">
+                                    <i class="ki-outline ki-arrows-circle fs-5 me-1"></i>Switch
+                                </button>
+                            </div>
+                            <div class="form-text text-muted fs-8 mt-1">Paused campaign ka account yahan se change karo</div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Batch Settings --}}
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="symbol symbol-40px">
+                            <span class="symbol-label bg-light-warning">
+                                <i class="ki-outline ki-timer fs-2 text-warning"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <div class="fs-7 text-muted fw-semibold">Batch Cooldown</div>
+                            <div class="fs-6 fw-bold text-gray-900">
+                                {{ $bulkCampaign->batch_size ?? 50 }} messages → {{ $bulkCampaign->cooldown_minutes ?? 5 }} min rest
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Per-Message Delay --}}
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="symbol symbol-40px">
+                            <span class="symbol-label bg-light-info">
+                                <i class="ki-outline ki-time fs-2 text-info"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <div class="fs-7 text-muted fw-semibold">Per-Message Delay</div>
+                            <div class="fs-6 fw-bold text-gray-900">
+                                {{ $bulkCampaign->delay_min }}s – {{ $bulkCampaign->delay_max }}s
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
 
         {{-- Toolbar --}}
@@ -346,6 +428,30 @@
                 }, 10000); // 10 seconds
             }
             // ------------------------------
+
+            // --- Change Account Logic ---
+            $('#btn-change-account').on('click', function() {
+                let accountId = $('#change-account-select').val();
+                let btn = $(this);
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Switching...');
+
+                $.post('{{ route('admin.bulk_campaigns.change_account', $bulkCampaign->id) }}', {
+                    _token: '{{ csrf_token() }}',
+                    whatsapp_account_id: accountId
+                })
+                .done(function(res) {
+                    let selectedText = $('#change-account-select option:selected').text().trim();
+                    $('#current-account-label').text(selectedText);
+                    Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 2000, icon: 'success', title: res.message });
+                })
+                .fail(function(xhr) {
+                    Swal.fire({ toast: true, position: 'top', showConfirmButton: false, timer: 3000, icon: 'error', title: xhr.responseJSON?.message || 'Failed to change account.' });
+                })
+                .always(function() {
+                    btn.prop('disabled', false).html('<i class="ki-outline ki-arrows-circle fs-5 me-1"></i>Switch');
+                });
+            });
+            // ----------------------------
         });
     </script>
 @endpush
