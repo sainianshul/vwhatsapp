@@ -156,11 +156,11 @@
                                 <div class="row mb-7">
                                     <div class="col-6">
                                         <label class="form-label fw-semibold fs-7">Min Delay (sec)</label>
-                                        <input type="number" name="delay_min" class="form-control form-control-sm" value="35" min="1" required />
+                                        <input type="number" name="delay_min" class="form-control form-control-sm" value="25" min="1" required />
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label fw-semibold fs-7">Max Delay (sec)</label>
-                                        <input type="number" name="delay_max" class="form-control form-control-sm" value="60" min="2" required />
+                                        <input type="number" name="delay_max" class="form-control form-control-sm" value="40" min="2" required />
                                     </div>
                                 </div>
 

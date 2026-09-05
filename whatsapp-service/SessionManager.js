@@ -22,13 +22,13 @@ class SessionManager {
         this.heartbeatInterval = null;
 
         // ─── Configuration ───
-        this.MAX_RECONNECT_ATTEMPTS = 5;
-        this.RECONNECT_BASE_DELAY_MS = 10000;     // 10 seconds
-        this.RECONNECT_MAX_DELAY_MS = 120000;      // 2 minutes max
-        this.BOOT_TIMEOUT_MS = 5 * 60 * 1000;     // 5 minutes (up from 3)
+        this.MAX_RECONNECT_ATTEMPTS = 15;          // More attempts before giving up
+        this.RECONNECT_BASE_DELAY_MS = 5000;       // 5 seconds (faster first retry)
+        this.RECONNECT_MAX_DELAY_MS = 60000;       // 1 minute max backoff
+        this.BOOT_TIMEOUT_MS = 5 * 60 * 1000;     // 5 minutes
         this.QR_TIMEOUT_MS = 180000;               // 3 minutes for QR scan
-        this.PUPPETEER_TIMEOUT_MS = 180000;        // 3 minutes (up from 2)
-        this.HEARTBEAT_INTERVAL_MS = 60000;        // Check every 60 seconds
+        this.PUPPETEER_TIMEOUT_MS = 180000;        // 3 minutes
+        this.HEARTBEAT_INTERVAL_MS = 30000;        // Check every 30 seconds (faster detection)
 
         // Start heartbeat monitoring
         this._startHeartbeat();
@@ -56,7 +56,6 @@ class SessionManager {
                     '--disable-dev-shm-usage',
                     '--disable-accelerated-2d-canvas',
                     '--no-first-run',
-                    '--no-zygote',
                     '--disable-gpu',
                     '--disable-extensions',
                     '--mute-audio',
@@ -64,7 +63,11 @@ class SessionManager {
                     '--disable-background-timer-throttling',
                     '--disable-backgrounding-occluded-windows',
                     '--disable-renderer-backgrounding',
-                    '--single-process'
+                    // NOTE: --single-process REMOVED — it causes full browser crash on any tab error
+                    // NOTE: --no-zygote REMOVED — it conflicts with multi-process stability
+                    '--disable-features=TranslateUI',
+                    '--disable-ipc-flooding-protection',
+                    '--max_old_space_size=512'
                 ],
                 timeout: this.PUPPETEER_TIMEOUT_MS,
                 headless: true
@@ -542,9 +545,16 @@ class SessionManager {
             return result;
         } catch (err) {
             if (this._isPuppeteerCrash(err)) {
-                console.error(`[SessionManager] Puppeteer crash in sendMessage for ${sessionId}: ${err.message}`);
-                this._cleanupSession(sessionId, true); // Allow reconnect
-                throw new Error('Session crashed. Auto-reconnecting... Please retry in 30 seconds.');
+                console.error(`[SessionManager] Puppeteer crash in sendMessage for ${sessionId}: ${err.message}. Auto-recovering...`);
+                this._cleanupSession(sessionId, true); // Trigger reconnect
+
+                // Wait for reconnect and retry once
+                const reconnected = await this._waitForReconnect(sessionId, 60);
+                if (reconnected) {
+                    console.log(`[SessionManager] Session ${sessionId} recovered! Retrying sendMessage...`);
+                    return this.sendMessage(sessionId, to, message);
+                }
+                throw new Error('Session crashed and could not auto-recover. It is reconnecting in background — please retry in 30 seconds.');
             }
             throw err;
         }
@@ -619,9 +629,16 @@ class SessionManager {
             return result;
         } catch (err) {
             if (this._isPuppeteerCrash(err)) {
-                console.error(`[SessionManager] Puppeteer crash in sendMediaMessage for ${sessionId}: ${err.message}`);
-                this._cleanupSession(sessionId, true); // Allow reconnect
-                throw new Error('Session crashed. Auto-reconnecting... Please retry in 30 seconds.');
+                console.error(`[SessionManager] Puppeteer crash in sendMediaMessage for ${sessionId}: ${err.message}. Auto-recovering...`);
+                this._cleanupSession(sessionId, true); // Trigger reconnect
+
+                // Wait for reconnect and retry once
+                const reconnected = await this._waitForReconnect(sessionId, 60);
+                if (reconnected) {
+                    console.log(`[SessionManager] Session ${sessionId} recovered! Retrying sendMediaMessage...`);
+                    return this.sendMediaMessage(sessionId, to, mediaPath, caption, filename);
+                }
+                throw new Error('Session crashed and could not auto-recover. It is reconnecting in background — please retry in 30 seconds.');
             }
             throw err;
         }
@@ -646,6 +663,31 @@ class SessionManager {
                msg.includes('frame was detached') ||
                msg.includes('cannot find context') ||
                msg.includes('most likely the page has been closed');
+    }
+
+    /**
+     * Wait for a session to reconnect after a crash.
+     * Polls every 5 seconds, up to maxWaitSeconds.
+     * Returns true if session became 'connected', false if timed out.
+     */
+    async _waitForReconnect(sessionId, maxWaitSeconds = 60) {
+        const pollInterval = 5000; // 5 seconds
+        const maxAttempts = Math.ceil((maxWaitSeconds * 1000) / pollInterval);
+
+        for (let i = 0; i < maxAttempts; i++) {
+            await new Promise(resolve => setTimeout(resolve, pollInterval));
+            const status = this.status.get(sessionId);
+            if (status === 'connected') {
+                return true;
+            }
+            if (status === 'error' || status === 'auth_failed' || status === 'disconnected') {
+                console.log(`[SessionManager] _waitForReconnect: Session ${sessionId} reached terminal state '${status}', giving up.`);
+                return false;
+            }
+            console.log(`[SessionManager] _waitForReconnect: Session ${sessionId} status='${status}', waiting... (${i + 1}/${maxAttempts})`);
+        }
+        console.log(`[SessionManager] _waitForReconnect: Timed out waiting for ${sessionId} to reconnect.`);
+        return false;
     }
 
     // ═══════════════════════════════════════════════════════════════════
