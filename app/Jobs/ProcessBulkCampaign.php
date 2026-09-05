@@ -210,7 +210,12 @@ class ProcessBulkCampaign implements ShouldQueue
                 ]);
 
                 // Send Message via Service (media or text) — with Auto-Retry for Boot Errors
-                $sessionId = $this->campaign->whatsappAccount->session_id;
+                $account = $this->campaign->whatsappAccount;
+                if (!$account) {
+                    $this->campaign->update(['status' => 'paused']);
+                    throw new \Exception("WhatsApp Account has been deleted. Campaign paused. Please switch to a connected account from the campaign panel.");
+                }
+                $sessionId = $account->session_id;
                 $response = null;
                 $maxRetries = 12; // 12 retries × 15 sec = 3 minutes max wait
                 $retryDelay = 15; // seconds

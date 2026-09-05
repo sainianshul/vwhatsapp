@@ -38,6 +38,13 @@ class ProcessQuickMessage implements ShouldQueue
         }
 
         try {
+            $account = $messageRecord->whatsappAccount;
+            if (!$account) {
+                $messageRecord->update(['status' => 'failed']);
+                throw new \Exception("WhatsApp Account is missing or has been deleted.");
+            }
+            $sessionId = $account->session_id;
+
             $response = null;
             $maxRetries = 12; // 12 retries × 15 sec = 3 minutes max wait
             $retryDelay = 15; // seconds
@@ -47,7 +54,7 @@ class ProcessQuickMessage implements ShouldQueue
                     $mediaAbsolutePath = \Illuminate\Support\Facades\Storage::path($messageRecord->media_path);
                     if (file_exists($mediaAbsolutePath)) {
                         $response = $whatsappService->sendMediaMessage(
-                            $messageRecord->whatsappAccount->session_id,
+                            $sessionId,
                             $messageRecord->receiver_number,
                             $mediaAbsolutePath,
                             $messageRecord->message_text,
@@ -56,14 +63,14 @@ class ProcessQuickMessage implements ShouldQueue
                     } else {
                         Log::warning("ProcessQuickMessage Error: Media file not found at {$mediaAbsolutePath}, sending text only.");
                         $response = $whatsappService->sendMessage(
-                            $messageRecord->whatsappAccount->session_id,
+                            $sessionId,
                             $messageRecord->receiver_number,
                             $messageRecord->message_text
                         );
                     }
                 } else {
                     $response = $whatsappService->sendMessage(
-                        $messageRecord->whatsappAccount->session_id,
+                        $sessionId,
                         $messageRecord->receiver_number,
                         $messageRecord->message_text
                     );
